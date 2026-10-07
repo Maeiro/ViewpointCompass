@@ -2,6 +2,10 @@
 
 A standalone Project Zomboid mod that adds a slim, camera-aligned compass ribbon while Project Viewpoint is active.
 
+## Steam Workshop
+
+[Subscribe to Viewpoint Compass](https://steamcommunity.com/sharedfiles/filedetails/?id=3815014026) (Workshop ID: `3815014026`).
+
 ## Features
 
 - Live camera heading in degrees and cardinal direction.
