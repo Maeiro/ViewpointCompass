@@ -12,14 +12,31 @@ local options
 if PZAPI and PZAPI.ModOptions then
     options = PZAPI.ModOptions:create(MOD_ID, "Viewpoint Compass")
     options:addTickBox("ShowCompass", "Show directional compass", true)
+    options:addTickBox(
+        "RequireCompassItem",
+        "Require a Compass item to show the compass",
+        false,
+        "When enabled, you must carry the vanilla Compass item in your inventory or a carried bag."
+    )
 end
 
-local function compassEnabled()
-    if not options or not options.getOption then return true end
-    local ok, option = pcall(function() return options:getOption("ShowCompass") end)
-    if not ok or not option or not option.getValue then return true end
+local function optionValue(name, fallback)
+    if not options or not options.getOption then return fallback end
+    local ok, option = pcall(function() return options:getOption(name) end)
+    if not ok or not option or not option.getValue then return fallback end
     local valueOk, value = pcall(function() return option:getValue() end)
-    return not valueOk or value == true
+    if not valueOk or value == nil then return fallback end
+    return value
+end
+
+local function hasCompassItem(playerNum)
+    local player = getSpecificPlayer(playerNum)
+    if not player then return false end
+    local ok, hasCompass = pcall(function()
+        local inventory = player:getInventory()
+        return inventory and inventory:contains("Base.CompassDirectional", true)
+    end)
+    return ok and hasCompass == true
 end
 
 local function cameraHeading()
@@ -105,9 +122,12 @@ local function ensureCompass(playerNum)
 end
 
 local function updateCompasses()
-    local heading = compassEnabled() and cameraHeading() or nil
+    local enabled = optionValue("ShowCompass", true)
+    local requireCompassItem = optionValue("RequireCompassItem", false)
+    local heading = enabled and cameraHeading() or nil
     for playerNum, ui in pairs(uiByPlayer) do
         local visible = heading ~= nil
+            and (not requireCompassItem or hasCompassItem(playerNum))
         if ui:getIsVisible() ~= visible then
             ui:setVisible(visible)
         end

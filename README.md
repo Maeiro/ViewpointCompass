@@ -12,6 +12,7 @@ A standalone Project Zomboid mod that adds a slim, camera-aligned compass ribbon
 - Five-degree ticks and fifteen-degree labels.
 - Follows Viewpoint's free-look camera.
 - Enabled by default and configurable through Mod Options.
+- Optionally require the vanilla Compass item to be carried (disabled by default).
 - Hidden automatically while Viewpoint is inactive.
 
 ## Requirements
