@@ -1,7 +1,7 @@
 name=Viewpoint Compass
 id=ViewpointCompass
 author=Maeiro
-description=Adds a camera-aligned directional compass to Project Viewpoint.
+description=Adds a customizable, camera-aligned directional compass to Project Viewpoint.
 modversion=1.1.0
 versionMin=42.21
 require=\ZombieBuddy,\Viewpoint

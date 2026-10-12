@@ -2,10 +2,62 @@ require "PZAPI/ModOptions"
 require "ISUI/ISUIElement"
 
 local MOD_ID = "ViewpointCompass"
-local WIDTH = 520
+local DEFAULT_WIDTH = 520
+local MIN_WIDTH = 360
+local MAX_WIDTH = 1000
 local HEIGHT = 42
 local PIXELS_PER_DEGREE = 6
-local HALF_RANGE = WIDTH / (2 * PIXELS_PER_DEGREE)
+local DEFAULT_LABEL_COLOR = { r = 222 / 255, g = 178 / 255, b = 110 / 255, a = 1 }
+local LANGUAGE_NAMES = {
+    "English",
+    "Portuguese (Brazil)",
+    "Chinese (Simplified)",
+    "Russian",
+    "Spanish",
+    "French",
+    "German",
+    "Japanese",
+}
+local DIRECTIONS_BY_LANGUAGE = {
+    { "N", "NE", "E", "SE", "S", "SW", "W", "NW" },
+    { "N", "NE", "L", "SE", "S", "SO", "O", "NO" },
+    { "Bei", "Dongbei", "Dong", "Dongnan", "Nan", "Xinan", "Xi", "Xibei" },
+    {
+        "UI_ViewpointCompass_RU_N", "UI_ViewpointCompass_RU_NE",
+        "UI_ViewpointCompass_RU_E", "UI_ViewpointCompass_RU_SE",
+        "UI_ViewpointCompass_RU_S", "UI_ViewpointCompass_RU_SW",
+        "UI_ViewpointCompass_RU_W", "UI_ViewpointCompass_RU_NW",
+    },
+    { "N", "NE", "E", "SE", "S", "SO", "O", "NO" },
+    { "N", "NE", "E", "SE", "S", "SO", "O", "NO" },
+    { "N", "NO", "O", "SO", "S", "SW", "W", "NW" },
+    { "Kita", "Hokuto", "Higashi", "Nanto", "Minami", "Nansei", "Nishi", "Hokusei" },
+}
+local NATIVE_DIRECTIONS_BY_LANGUAGE = {
+    [3] = {
+        CN = {
+            "UI_ViewpointCompass_CN_N", "UI_ViewpointCompass_CN_NE",
+            "UI_ViewpointCompass_CN_E", "UI_ViewpointCompass_CN_SE",
+            "UI_ViewpointCompass_CN_S", "UI_ViewpointCompass_CN_SW",
+            "UI_ViewpointCompass_CN_W", "UI_ViewpointCompass_CN_NW",
+        },
+        CH = {
+            "UI_ViewpointCompass_CH_N", "UI_ViewpointCompass_CH_NE",
+            "UI_ViewpointCompass_CH_E", "UI_ViewpointCompass_CH_SE",
+            "UI_ViewpointCompass_CH_S", "UI_ViewpointCompass_CH_SW",
+            "UI_ViewpointCompass_CH_W", "UI_ViewpointCompass_CH_NW",
+        },
+    },
+    [8] = {
+        JP = {
+            "UI_ViewpointCompass_JP_N", "UI_ViewpointCompass_JP_NE",
+            "UI_ViewpointCompass_JP_E", "UI_ViewpointCompass_JP_SE",
+            "UI_ViewpointCompass_JP_S", "UI_ViewpointCompass_JP_SW",
+            "UI_ViewpointCompass_JP_W", "UI_ViewpointCompass_JP_NW",
+        },
+    },
+}
+local LATIN_FALLBACK_DIRECTIONS = { "N", "NE", "E", "SE", "S", "SW", "W", "NW" }
 local uiByPlayer = {}
 
 local options
@@ -18,6 +70,19 @@ if PZAPI and PZAPI.ModOptions then
         false,
         "When enabled, you must carry the vanilla Compass item in your inventory or a carried bag."
     )
+    options:addSlider("CompassWidth", "Compass width (pixels)", MIN_WIDTH, MAX_WIDTH, 20, DEFAULT_WIDTH)
+    options:addColorPicker(
+        "CompassLabelColor",
+        "Compass direction label color",
+        DEFAULT_LABEL_COLOR.r,
+        DEFAULT_LABEL_COLOR.g,
+        DEFAULT_LABEL_COLOR.b,
+        DEFAULT_LABEL_COLOR.a
+    )
+    local languageOption = options:addComboBox("CompassLanguage", "Compass direction language")
+    for index, language in ipairs(LANGUAGE_NAMES) do
+        languageOption:addItem(language, index == 1)
+    end
 end
 
 local function optionValue(name, fallback)
@@ -52,10 +117,62 @@ local function shortestAngle(angle)
     return (angle + 540) % 360 - 180
 end
 
-local function cardinalDirection(heading)
-    local directions = { "N", "NE", "E", "SE", "S", "SW", "W", "NW" }
-    local index = math.floor((heading + 22.5) / 45) % #directions + 1
-    return directions[index]
+local function compassWidth()
+    local width = optionValue("CompassWidth", DEFAULT_WIDTH)
+    if type(width) ~= "number" then return DEFAULT_WIDTH end
+    return math.max(MIN_WIDTH, math.min(MAX_WIDTH, width))
+end
+
+local function compassLanguage()
+    local language = optionValue("CompassLanguage", 1)
+    if type(language) ~= "number" or DIRECTIONS_BY_LANGUAGE[language] == nil then
+        return 1
+    end
+    return language
+end
+
+local function compassLabelColor()
+    local color = optionValue("CompassLabelColor", DEFAULT_LABEL_COLOR)
+    if type(color) ~= "table" or type(color.r) ~= "number"
+        or type(color.g) ~= "number" or type(color.b) ~= "number" then
+        return DEFAULT_LABEL_COLOR
+    end
+    return {
+        r = math.max(0, math.min(1, color.r)),
+        g = math.max(0, math.min(1, color.g)),
+        b = math.max(0, math.min(1, color.b)),
+        a = type(color.a) == "number" and math.max(0, math.min(1, color.a)) or 1,
+    }
+end
+
+local function directionAtBearing(bearing, language, activeLanguageCode)
+    local directions = DIRECTIONS_BY_LANGUAGE[language] or DIRECTIONS_BY_LANGUAGE[1]
+    local index = math.floor((bearing + 22.5) / 45) % #directions + 1
+    local nativeByGameLanguage = NATIVE_DIRECTIONS_BY_LANGUAGE[language]
+    local nativeDirections = nativeByGameLanguage and nativeByGameLanguage[activeLanguageCode]
+    if nativeDirections then
+        local translated = getTextOrNull and getTextOrNull(nativeDirections[index])
+        if type(translated) == "string" and translated ~= "" then
+            return translated
+        end
+    end
+    local direction = directions[index]
+    if direction:sub(1, 3) == "UI_" then
+        local translated = getTextOrNull and getTextOrNull(direction)
+        if type(translated) == "string" and translated ~= "" then
+            return translated
+        end
+        return LATIN_FALLBACK_DIRECTIONS[index]
+    end
+    return direction
+end
+
+local function gameLanguageCode()
+    if not Translator or not Translator.getLanguage then return nil end
+    local ok, languageCode = pcall(function()
+        return Translator.getLanguage():name()
+    end)
+    return ok and languageCode or nil
 end
 
 local function playerScreenBounds(playerNum)
@@ -69,14 +186,17 @@ end
 local ViewpointCompassUI = ISUIElement:derive("ViewpointCompassUI")
 
 function ViewpointCompassUI:new(playerNum)
-    local o = ISUIElement.new(self, 0, 0, WIDTH, HEIGHT)
+    local o = ISUIElement.new(self, 0, 0, DEFAULT_WIDTH, HEIGHT)
     o.playerNum = playerNum
     o.heading = 0
+    o.language = 1
+    o.labelColor = DEFAULT_LABEL_COLOR
     o:initialise()
     o:instantiate()
     o:setRenderThisPlayerOnly(playerNum)
     o:setFollowGameWorld(false)
     o:addToUIManager()
+    o:backMost()
     o:setVisible(false)
     return o
 end
@@ -85,21 +205,29 @@ function ViewpointCompassUI:render()
     local width = self:getWidth()
     local centerX = width / 2
     local heading = self.heading
+    local halfRange = width / (2 * PIXELS_PER_DEGREE)
+    local labelColor = self.labelColor
 
     self:drawRect(0, 29, width, 1, 0.28, 0.82, 0.88, 0.91)
 
     for bearing = 0, 355, 5 do
         local delta = shortestAngle(bearing - heading)
-        if math.abs(delta) <= HALF_RANGE then
+        local isCardinal = bearing % 45 == 0
+        if math.abs(delta) <= halfRange then
             local x = centerX + delta * PIXELS_PER_DEGREE
             local major = bearing % 15 == 0
-            local tickHeight = major and 12 or 6
-            self:drawRect(x, 29 - tickHeight, 1, tickHeight, major and 0.78 or 0.48,
+            local tickHeight = isCardinal and 12 or (major and 10 or 6)
+            self:drawRect(x, 29 - tickHeight, 1, tickHeight, (major or isCardinal) and 0.78 or 0.48,
                 0.85, 0.9, 0.92)
 
-            if major and math.abs(delta) > 5 then
-                self:drawTextCentre(string.format("%03d", bearing), x, 3,
-                    0.76, 0.82, 0.85, 0.92, UIFont.Small)
+            if (major or isCardinal) and math.abs(delta) > 5 then
+                if isCardinal then
+                    self:drawTextCentre(directionAtBearing(bearing, self.language, self.languageCode), x, 3,
+                        labelColor.r, labelColor.g, labelColor.b, labelColor.a, UIFont.Small)
+                else
+                    self:drawTextCentre(string.format("%03d", bearing), x, 3,
+                        0.76, 0.82, 0.85, 0.92, UIFont.Small)
+                end
             end
         end
     end
@@ -109,8 +237,10 @@ function ViewpointCompassUI:render()
         0.72, 0.16, 0.19, 0.22)
     self:drawRectBorder(centerX - centerWidth / 2, 1, centerWidth, 23,
         0.58, 0.72, 0.78, 0.81)
-    self:drawTextCentre(string.format("%03d %s", math.floor(heading + 0.5) % 360,
-        cardinalDirection(heading)), centerX, 4, 0.96, 0.94, 0.94, 0.94, UIFont.Small)
+    self:drawTextRight(string.format("%03d", math.floor(heading + 0.5) % 360),
+        centerX - 3, 4, 0.96, 0.94, 0.94, 0.94, UIFont.Small)
+    self:drawText(directionAtBearing(heading, self.language, self.languageCode), centerX + 3, 4,
+        labelColor.r, labelColor.g, labelColor.b, labelColor.a, UIFont.Small)
 end
 
 local function ensureCompass(playerNum)
@@ -124,6 +254,10 @@ end
 local function updateCompasses()
     local enabled = optionValue("ShowCompass", true)
     local requireCompassItem = optionValue("RequireCompassItem", false)
+    local configuredWidth = compassWidth()
+    local language = compassLanguage()
+    local languageCode = gameLanguageCode()
+    local labelColor = compassLabelColor()
     local heading = enabled and cameraHeading() or nil
     for playerNum, ui in pairs(uiByPlayer) do
         local visible = heading ~= nil
@@ -132,12 +266,19 @@ local function updateCompasses()
             ui:setVisible(visible)
         end
         if visible then
-            local left, top, width = playerScreenBounds(playerNum)
-            if left and top and width then
-                ui:setX(left + (width - ui:getWidth()) / 2)
+            local left, top, screenWidth = playerScreenBounds(playerNum)
+            local width = screenWidth and math.min(configuredWidth, screenWidth) or configuredWidth
+            if ui:getWidth() ~= width then
+                ui:setWidth(width)
+            end
+            if left and top and screenWidth then
+                ui:setX(left + (screenWidth - ui:getWidth()) / 2)
                 ui:setY(top + 18)
             end
             ui.heading = heading
+            ui.language = language
+            ui.languageCode = languageCode
+            ui.labelColor = labelColor
         end
     end
 end
