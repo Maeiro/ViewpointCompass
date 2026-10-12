@@ -232,14 +232,21 @@ function ViewpointCompassUI:render()
         end
     end
 
-    local centerWidth = 58
+    local headingText = string.format("%03d", math.floor(heading + 0.5) % 360)
+    local directionText = directionAtBearing(heading, self.language, self.languageCode)
+    local textGap = 3
+    local horizontalPadding = 4
+    local headingTextWidth = getTextManager():MeasureStringX(UIFont.Small, headingText)
+    local directionTextWidth = getTextManager():MeasureStringX(UIFont.Small, directionText)
+    local textWidth = headingTextWidth + textGap + directionTextWidth
+    local centerWidth = textWidth + horizontalPadding * 2
+    local textLeft = centerX - textWidth / 2
     self:drawRect(centerX - centerWidth / 2, 1, centerWidth, 23,
         0.72, 0.16, 0.19, 0.22)
     self:drawRectBorder(centerX - centerWidth / 2, 1, centerWidth, 23,
         0.58, 0.72, 0.78, 0.81)
-    self:drawTextRight(string.format("%03d", math.floor(heading + 0.5) % 360),
-        centerX - 3, 4, 0.96, 0.94, 0.94, 0.94, UIFont.Small)
-    self:drawText(directionAtBearing(heading, self.language, self.languageCode), centerX + 3, 4,
+    self:drawText(headingText, textLeft, 4, 0.96, 0.94, 0.94, 0.94, UIFont.Small)
+    self:drawText(directionText, textLeft + headingTextWidth + textGap, 4,
         labelColor.r, labelColor.g, labelColor.b, labelColor.a, UIFont.Small)
 end
 
