@@ -10,15 +10,21 @@ local MAX_WIDTH = 1000
 local HEIGHT = 42
 local PIXELS_PER_DEGREE = 6
 local DEFAULT_LABEL_COLOR = { r = 222 / 255, g = 178 / 255, b = 110 / 255, a = 1 }
-local LANGUAGE_NAMES = {
-    "English",
-    "Portuguese (Brazil)",
-    "Chinese (Simplified)",
-    "Russian",
-    "Spanish",
-    "French",
-    "German",
-    "Japanese",
+local function uiText(key, fallback)
+    local translated = getTextOrNull and getTextOrNull("UI_ViewpointCompass_" .. key)
+    if type(translated) == "string" and translated ~= "" then return translated end
+    return fallback
+end
+
+local LANGUAGES = {
+    { key = "Language_English", fallback = "English" },
+    { key = "Language_PortugueseBrazil", fallback = "Portuguese (Brazil)" },
+    { key = "Language_ChineseSimplified", fallback = "Chinese (Simplified)" },
+    { key = "Language_Russian", fallback = "Russian" },
+    { key = "Language_Spanish", fallback = "Spanish" },
+    { key = "Language_French", fallback = "French" },
+    { key = "Language_German", fallback = "German" },
+    { key = "Language_Japanese", fallback = "Japanese" },
 }
 local DIRECTIONS_BY_LANGUAGE = {
     { "N", "NE", "E", "SE", "S", "SW", "W", "NW" },
@@ -64,8 +70,8 @@ local uiByPlayer = {}
 
 local options
 if PZAPI and PZAPI.ModOptions then
-    options = PZAPI.ModOptions:create(MOD_ID, "Viewpoint Compass")
-    options:addTickBox("ShowCompass", "Show directional compass", true)
+    options = PZAPI.ModOptions:create(MOD_ID, uiText("Name", "Viewpoint Compass"))
+    options:addTickBox("ShowCompass", uiText("Options_ShowCompass", "Show directional compass"), true)
     options:addTickBox("ShowMapMarkers", Markers.text("Show"), true)
     options:addTickBox("MapMarkerBackground", Markers.text("Background"), false)
     local markerPosition = options:addComboBox("MapMarkerPosition", Markers.text("Position"))
@@ -74,22 +80,25 @@ if PZAPI and PZAPI.ModOptions then
     end
     options:addTickBox(
         "RequireCompassItem",
-        "Require a Compass item to show the compass",
+        uiText("Options_RequireCompassItem", "Require a Compass item to show the compass"),
         false,
-        "When enabled, you must carry the vanilla Compass item in your inventory or a carried bag."
+        uiText("Options_RequireCompassItemTooltip",
+            "When enabled, you must carry the vanilla Compass item in your inventory or a carried bag.")
     )
-    options:addSlider("CompassWidth", "Compass width (pixels)", MIN_WIDTH, MAX_WIDTH, 20, DEFAULT_WIDTH)
+    options:addSlider("CompassWidth", uiText("Options_CompassWidth", "Compass width (pixels)"),
+        MIN_WIDTH, MAX_WIDTH, 20, DEFAULT_WIDTH)
     options:addColorPicker(
         "CompassLabelColor",
-        "Compass direction label color",
+        uiText("Options_CompassLabelColor", "Compass direction label color"),
         DEFAULT_LABEL_COLOR.r,
         DEFAULT_LABEL_COLOR.g,
         DEFAULT_LABEL_COLOR.b,
         DEFAULT_LABEL_COLOR.a
     )
-    local languageOption = options:addComboBox("CompassLanguage", "Compass direction language")
-    for index, language in ipairs(LANGUAGE_NAMES) do
-        languageOption:addItem(language, index == 1)
+    local languageOption = options:addComboBox("CompassLanguage",
+        uiText("Options_CompassLanguage", "Compass direction language"))
+    for index, language in ipairs(LANGUAGES) do
+        languageOption:addItem(uiText(language.key, language.fallback), index == 1)
     end
 end
 

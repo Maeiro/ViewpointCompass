@@ -12,6 +12,7 @@ A customizable, camera-aligned compass ribbon for Project Zomboid, showing your 
 - Five-degree ticks and fifteen-degree labels.
 - Cardinal and intercardinal labels replace degree numbers at their bearings.
 - Choose direction labels in English, Brazilian Portuguese, Chinese, Russian, Spanish, French, German, or Japanese; Chinese and Japanese clients use native characters, with pinyin/romaji elsewhere.
+- The in-game interface, Mod Options, and map-marker tools are localized in Simplified and Traditional Chinese.
 - Adjust the compass width and direction-label color; the default color is `#DEB26E`.
 - Renders behind game windows such as the inventory.
 - Follows Viewpoint's free-look camera.
