@@ -337,14 +337,18 @@ if Events and Events.OnCreatePlayer then
     end)
 end
 
-if Events and Events.OnGameStart then
-    Events.OnGameStart.Add(function()
-        local playerCount = getNumActivePlayers and getNumActivePlayers() or 1
-        for playerNum = 0, playerCount - 1 do
+local function initializePlayers()
+    local playerCount = getNumActivePlayers and getNumActivePlayers() or 1
+    for playerNum = 0, playerCount - 1 do
+        if getSpecificPlayer(playerNum) then
             ensureCompass(playerNum)
         end
-        updateCompasses()
-    end)
+    end
+    updateCompasses()
+end
+
+if Events and Events.OnGameStart then
+    Events.OnGameStart.Add(initializePlayers)
 end
 
 if Events and Events.OnPreUIDraw then
@@ -358,3 +362,5 @@ if Events and Events.OnSave then
         end
     end)
 end
+
+initializePlayers()

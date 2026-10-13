@@ -16,6 +16,7 @@ A customizable, camera-aligned compass ribbon for Project Zomboid, showing your 
 - Renders behind game windows such as the inventory.
 - Follows Viewpoint's free-look camera.
 - Enabled by default and configurable through Mod Options.
+- Client-side multiplayer support: each player installs the mod locally; the server does not need to enable it.
 - Optionally require the vanilla Compass item to be carried (disabled by default).
 - Hidden automatically while Viewpoint is inactive.
 - Opt-in destinations from symbols and notes on the main world map (M), with their colors, camera-relative icons and distance in meters (one tile = one meter).
@@ -41,3 +42,4 @@ A customizable, camera-aligned compass ribbon for Project Zomboid, showing your 
 - Project Viewpoint.
 - ZombieBuddy 2.3.0 or newer.
 - Project Zomboid Build 42.21.
+- In multiplayer, install the mod on each client that wants the compass. Do not add it to the server's mod list.

@@ -13,4 +13,20 @@ public final class Patches {
             ViewpointCompassBridge.getHeading();
         }
     }
+
+    @Patch(className = "zombie.gameStates.MainScreenState", methodName = "enter", warmUp = true)
+    public static class LoadClientLuaAtMainScreen {
+        @Patch.OnExit
+        public static void exit() {
+            ClientLuaBootstrap.load();
+        }
+    }
+
+    @Patch(className = "zombie.gameStates.IngameState", methodName = "enter", warmUp = true)
+    public static class LoadClientLuaOnWorldEnter {
+        @Patch.OnExit
+        public static void exit() {
+            ClientLuaBootstrap.load();
+        }
+    }
 }
