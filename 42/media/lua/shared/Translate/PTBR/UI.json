@@ -1,0 +1,17 @@
+{
+    "UI_ViewpointCompass_Markers_Add": "Adicionar à bússola",
+    "UI_ViewpointCompass_Markers_Manage": "Marcações da bússola",
+    "UI_ViewpointCompass_Markers_Show": "Exibir marcações do mapa",
+    "UI_ViewpointCompass_Markers_Rename": "Renomear",
+    "UI_ViewpointCompass_Markers_Locate": "Localizar no mapa",
+    "UI_ViewpointCompass_Markers_Remove": "Remover",
+    "UI_ViewpointCompass_Markers_RemoveAll": "Remover todas",
+    "UI_ViewpointCompass_Markers_Confirm": "Remover todas as marcações da bússola? As marcações do mapa serão mantidas.",
+    "UI_ViewpointCompass_Markers_Empty": "Nenhuma marcação. Adicione um destino pelo painel do mapa.",
+    "UI_ViewpointCompass_Markers_Select": "Clique em uma marcação do mapa. Esc ou clique direito cancela.",
+    "UI_ViewpointCompass_Markers_Note": "Nota",
+    "UI_ViewpointCompass_Markers_Position": "Posição das marcações do mapa",
+    "UI_ViewpointCompass_Markers_Above": "Acima da bússola",
+    "UI_ViewpointCompass_Markers_Inside": "Dentro da bússola",
+    "UI_ViewpointCompass_Markers_Below": "Abaixo da bússola"
+}

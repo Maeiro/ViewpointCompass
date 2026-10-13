@@ -14,6 +14,7 @@ public final class ViewpointCompassBridge {
 
     static {
         Exposer.exposeClass(ViewpointCompassBridge.class, "ViewpointCompass");
+        MapMarkerBridge.initialize();
     }
 
     private ViewpointCompassBridge() {

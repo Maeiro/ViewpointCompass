@@ -1,5 +1,7 @@
 require "PZAPI/ModOptions"
 require "ISUI/ISUIElement"
+local Markers = require "ViewpointCompass/Markers"
+require "ViewpointCompass/MapIntegration"
 
 local MOD_ID = "ViewpointCompass"
 local DEFAULT_WIDTH = 520
@@ -64,6 +66,11 @@ local options
 if PZAPI and PZAPI.ModOptions then
     options = PZAPI.ModOptions:create(MOD_ID, "Viewpoint Compass")
     options:addTickBox("ShowCompass", "Show directional compass", true)
+    options:addTickBox("ShowMapMarkers", Markers.text("Show"), true)
+    local markerPosition = options:addComboBox("MapMarkerPosition", Markers.text("Position"))
+    for index, key in ipairs({ "Above", "Inside", "Below" }) do
+        markerPosition:addItem(Markers.text(key), index == 1)
+    end
     options:addTickBox(
         "RequireCompassItem",
         "Require a Compass item to show the compass",
@@ -207,8 +214,16 @@ function ViewpointCompassUI:render()
     local heading = self.heading
     local halfRange = width / (2 * PIXELS_PER_DEGREE)
     local labelColor = self.labelColor
+    local layout = self.markerLayout or Markers.layout(1, false, 0)
+    local markerOffset = layout.rulerY
+    local points = {}
+    if self.showMapMarkers then
+        local player = getSpecificPlayer(self.playerNum)
+        local state = player and Markers.refresh(player)
+        points = Markers.project(player, state and state.markers or {}, heading, width, PIXELS_PER_DEGREE)
+    end
 
-    self:drawRect(0, 29, width, 1, 0.28, 0.82, 0.88, 0.91)
+    self:drawRect(0, markerOffset + 29, width, 1, 0.28, 0.82, 0.88, 0.91)
 
     for bearing = 0, 355, 5 do
         local delta = shortestAngle(bearing - heading)
@@ -217,15 +232,15 @@ function ViewpointCompassUI:render()
             local x = centerX + delta * PIXELS_PER_DEGREE
             local major = bearing % 15 == 0
             local tickHeight = isCardinal and 12 or (major and 10 or 6)
-            self:drawRect(x, 29 - tickHeight, 1, tickHeight, (major or isCardinal) and 0.78 or 0.48,
+            self:drawRect(x, markerOffset + 29 - tickHeight, 1, tickHeight, (major or isCardinal) and 0.78 or 0.48,
                 0.85, 0.9, 0.92)
 
             if (major or isCardinal) and math.abs(delta) > 5 then
                 if isCardinal then
-                    self:drawTextCentre(directionAtBearing(bearing, self.language, self.languageCode), x, 3,
+                    self:drawTextCentre(directionAtBearing(bearing, self.language, self.languageCode), x, markerOffset + 3,
                         labelColor.r, labelColor.g, labelColor.b, labelColor.a, UIFont.Small)
                 else
-                    self:drawTextCentre(string.format("%03d", bearing), x, 3,
+                    self:drawTextCentre(string.format("%03d", bearing), x, markerOffset + 3,
                         0.76, 0.82, 0.85, 0.92, UIFont.Small)
                 end
             end
@@ -241,13 +256,29 @@ function ViewpointCompassUI:render()
     local textWidth = headingTextWidth + textGap + directionTextWidth
     local centerWidth = textWidth + horizontalPadding * 2
     local textLeft = centerX - textWidth / 2
-    self:drawRect(centerX - centerWidth / 2, 1, centerWidth, 23,
+    self:drawRect(centerX - centerWidth / 2, markerOffset + 1, centerWidth, 23,
         0.72, 0.16, 0.19, 0.22)
-    self:drawRectBorder(centerX - centerWidth / 2, 1, centerWidth, 23,
+    self:drawRectBorder(centerX - centerWidth / 2, markerOffset + 1, centerWidth, 23,
         0.58, 0.72, 0.78, 0.81)
-    self:drawText(headingText, textLeft, 4, 0.96, 0.94, 0.94, 0.94, UIFont.Small)
-    self:drawText(directionText, textLeft + headingTextWidth + textGap, 4,
+    self:drawText(headingText, textLeft, markerOffset + 4, 0.96, 0.94, 0.94, 0.94, UIFont.Small)
+    self:drawText(directionText, textLeft + headingTextWidth + textGap, markerOffset + 4,
         labelColor.r, labelColor.g, labelColor.b, labelColor.a, UIFont.Small)
+
+    for _, point in ipairs(points) do
+        local label = string.format("%dm", math.floor(point.distance + 0.5))
+        if point.count > 0 then label = label .. " +" .. point.count end
+        local labelWidth = getTextManager():MeasureStringX(UIFont.Small, label)
+        local halfWidth = math.max(12, labelWidth / 2 + 4)
+        local x = math.max(halfWidth, math.min(width - halfWidth, point.x))
+        if layout.inside then
+            self:drawRect(x - halfWidth, 0, halfWidth * 2, HEIGHT, 0.96, 0.10, 0.12, 0.14)
+            Markers.drawIcon(self, point.marker, x - 8, 2, 16)
+            self:drawTextCentre(label, x, 20, 0.96, 0.94, 0.94, 1, UIFont.Small)
+        else
+            Markers.drawIcon(self, point.marker, x - 10, layout.markerY + 18, 20)
+            self:drawTextCentre(label, x, layout.markerY, 0.96, 0.94, 0.94, 1, UIFont.Small)
+        end
+    end
 end
 
 local function ensureCompass(playerNum)
@@ -267,6 +298,12 @@ local function updateCompasses()
     local labelColor = compassLabelColor()
     local heading = enabled and cameraHeading() or nil
     for playerNum, ui in pairs(uiByPlayer) do
+        local player = getSpecificPlayer(playerNum)
+        local state = player and Markers.refresh(player)
+        ui.showMapMarkers = optionValue("ShowMapMarkers", true)
+        ui.markerLayout = Markers.layout(optionValue("MapMarkerPosition", 1), ui.showMapMarkers,
+            state and #state.markers or 0)
+        if ui:getHeight() ~= ui.markerLayout.height then ui:setHeight(ui.markerLayout.height) end
         local visible = heading ~= nil
             and (not requireCompassItem or hasCompassItem(playerNum))
         if ui:getIsVisible() ~= visible then
@@ -308,4 +345,12 @@ end
 
 if Events and Events.OnPreUIDraw then
     Events.OnPreUIDraw.Add(updateCompasses)
+end
+
+if Events and Events.OnSave then
+    Events.OnSave.Add(function()
+        for playerNum in pairs(uiByPlayer) do
+            Markers.refresh(getSpecificPlayer(playerNum), true)
+        end
+    end)
 end

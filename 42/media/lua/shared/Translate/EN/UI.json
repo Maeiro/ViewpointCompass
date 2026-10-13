@@ -30,5 +30,20 @@
     "UI_ViewpointCompass_JP_S": "南",
     "UI_ViewpointCompass_JP_SW": "南西",
     "UI_ViewpointCompass_JP_W": "西",
-    "UI_ViewpointCompass_JP_NW": "北西"
+    "UI_ViewpointCompass_JP_NW": "北西",
+    "UI_ViewpointCompass_Markers_Add": "Add to Compass",
+    "UI_ViewpointCompass_Markers_Manage": "Compass Markers",
+    "UI_ViewpointCompass_Markers_Show": "Show map markers",
+    "UI_ViewpointCompass_Markers_Rename": "Rename",
+    "UI_ViewpointCompass_Markers_Locate": "Locate on map",
+    "UI_ViewpointCompass_Markers_Remove": "Remove",
+    "UI_ViewpointCompass_Markers_RemoveAll": "Remove All",
+    "UI_ViewpointCompass_Markers_Confirm": "Remove all compass markers? Map annotations will be kept.",
+    "UI_ViewpointCompass_Markers_Empty": "No compass markers. Add a destination from Map Symbols.",
+    "UI_ViewpointCompass_Markers_Select": "Click a map annotation. Esc or right click cancels.",
+    "UI_ViewpointCompass_Markers_Note": "Note",
+    "UI_ViewpointCompass_Markers_Position": "Map marker position",
+    "UI_ViewpointCompass_Markers_Above": "Above the compass",
+    "UI_ViewpointCompass_Markers_Inside": "Inside the compass",
+    "UI_ViewpointCompass_Markers_Below": "Below the compass"
 }
