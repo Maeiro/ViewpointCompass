@@ -69,7 +69,11 @@ local LATIN_FALLBACK_DIRECTIONS = { "N", "NE", "E", "SE", "S", "SW", "W", "NW" }
 local uiByPlayer = {}
 
 local options
-if PZAPI and PZAPI.ModOptions then
+local function registerOptions()
+    if not PZAPI or not PZAPI.ModOptions then return end
+    options = PZAPI.ModOptions:getOptions(MOD_ID)
+    if options then return end
+
     options = PZAPI.ModOptions:create(MOD_ID, uiText("Name", "Viewpoint Compass"))
     options:addTickBox("ShowCompass", uiText("Options_ShowCompass", "Show directional compass"), true)
     options:addTickBox("ShowMapMarkers", Markers.text("Show"), true)
@@ -100,6 +104,12 @@ if PZAPI and PZAPI.ModOptions then
     for index, language in ipairs(LANGUAGES) do
         languageOption:addItem(uiText(language.key, language.fallback), index == 1)
     end
+end
+
+registerOptions()
+
+if Events and Events.OnGameBoot then
+    Events.OnGameBoot.Add(registerOptions)
 end
 
 local function optionValue(name, fallback)
@@ -348,16 +358,35 @@ end
 
 local function initializePlayers()
     local playerCount = getNumActivePlayers and getNumActivePlayers() or 1
+    local initializedCount = 0
     for playerNum = 0, playerCount - 1 do
         if getSpecificPlayer(playerNum) then
             ensureCompass(playerNum)
+            initializedCount = initializedCount + 1
         end
     end
-    updateCompasses()
+    if initializedCount > 0 then updateCompasses() end
+    return initializedCount == playerCount and initializedCount > 0
+end
+
+local function retryPlayerInitialization()
+    if initializePlayers() then
+        Events.OnTick.Remove(retryPlayerInitialization)
+    end
+end
+
+if Events and Events.OnCreatePlayer then
+    Events.OnCreatePlayer.Add(function(playerNum)
+        ensureCompass(playerNum)
+        retryPlayerInitialization()
+    end)
 end
 
 if Events and Events.OnGameStart then
-    Events.OnGameStart.Add(initializePlayers)
+    Events.OnGameStart.Add(function()
+        registerOptions()
+        retryPlayerInitialization()
+    end)
 end
 
 if Events and Events.OnPreUIDraw then
@@ -372,4 +401,6 @@ if Events and Events.OnSave then
     end)
 end
 
-initializePlayers()
+if not initializePlayers() and Events and Events.OnTick then
+    Events.OnTick.Add(retryPlayerInitialization)
+end
