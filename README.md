@@ -25,7 +25,7 @@ A customizable, camera-aligned compass ribbon for Project Zomboid, showing your 
 - Nearby ribbon icons are grouped within 24 pixels, showing the nearest destination and a count of the remaining points.
 - Selections and custom names persist per character/save, even before opening the map. Ambiguous or missing annotations are not restored to a different destination.
 - Show map markers is enabled by default; disabling it preserves selections. Paper maps are not supported.
-- Place map markers above (default), inside, or below the compass. Inside and below keep the ruler near the top edge; no marker band is reserved when the selection is empty. Inside markers use compact badges over their ruler positions.
+- Place map markers above, inside (default), or below the compass. Inside and below keep the ruler near the top edge; no marker band is reserved when the selection is empty. Inside markers have an optional background, disabled by default. Existing position preferences are preserved.
 
 ## Testing map markers
 

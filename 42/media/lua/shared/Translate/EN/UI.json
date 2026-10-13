@@ -45,5 +45,6 @@
     "UI_ViewpointCompass_Markers_Position": "Map marker position",
     "UI_ViewpointCompass_Markers_Above": "Above the compass",
     "UI_ViewpointCompass_Markers_Inside": "Inside the compass",
-    "UI_ViewpointCompass_Markers_Below": "Below the compass"
+    "UI_ViewpointCompass_Markers_Below": "Below the compass",
+    "UI_ViewpointCompass_Markers_Background": "Background for markers inside the compass"
 }

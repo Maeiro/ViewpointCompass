@@ -9,6 +9,7 @@ local fallback = {
     Select = "Click a map annotation. Esc or right click cancels.", Note = "Note",
     Position = "Map marker position", Above = "Above the compass", Inside = "Inside the compass",
     Below = "Below the compass",
+    Background = "Background for markers inside the compass",
 }
 
 function Markers.text(key)
@@ -17,9 +18,9 @@ end
 
 function Markers.layout(position, enabled, count)
     if not enabled or count == 0 then return { rulerY = 0, markerY = 0, height = 42 } end
-    if position == 2 then return { rulerY = 0, markerY = 0, height = 42, inside = true } end
+    if position == 1 then return { rulerY = 42, markerY = 0, height = 84 } end
     if position == 3 then return { rulerY = 0, markerY = 42, height = 84 } end
-    return { rulerY = 42, markerY = 0, height = 84 }
+    return { rulerY = 0, markerY = 0, height = 42, inside = true }
 end
 
 local function snapshot(symbol)

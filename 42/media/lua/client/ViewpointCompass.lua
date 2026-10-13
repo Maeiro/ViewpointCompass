@@ -67,9 +67,10 @@ if PZAPI and PZAPI.ModOptions then
     options = PZAPI.ModOptions:create(MOD_ID, "Viewpoint Compass")
     options:addTickBox("ShowCompass", "Show directional compass", true)
     options:addTickBox("ShowMapMarkers", Markers.text("Show"), true)
+    options:addTickBox("MapMarkerBackground", Markers.text("Background"), false)
     local markerPosition = options:addComboBox("MapMarkerPosition", Markers.text("Position"))
     for index, key in ipairs({ "Above", "Inside", "Below" }) do
-        markerPosition:addItem(Markers.text(key), index == 1)
+        markerPosition:addItem(Markers.text(key), index == 2)
     end
     options:addTickBox(
         "RequireCompassItem",
@@ -214,7 +215,7 @@ function ViewpointCompassUI:render()
     local heading = self.heading
     local halfRange = width / (2 * PIXELS_PER_DEGREE)
     local labelColor = self.labelColor
-    local layout = self.markerLayout or Markers.layout(1, false, 0)
+    local layout = self.markerLayout or Markers.layout(2, false, 0)
     local markerOffset = layout.rulerY
     local points = {}
     if self.showMapMarkers then
@@ -271,7 +272,9 @@ function ViewpointCompassUI:render()
         local halfWidth = math.max(12, labelWidth / 2 + 4)
         local x = math.max(halfWidth, math.min(width - halfWidth, point.x))
         if layout.inside then
-            self:drawRect(x - halfWidth, 0, halfWidth * 2, HEIGHT, 0.96, 0.10, 0.12, 0.14)
+            if self.markerBackground then
+                self:drawRect(x - halfWidth, 0, halfWidth * 2, HEIGHT, 0.96, 0.10, 0.12, 0.14)
+            end
             Markers.drawIcon(self, point.marker, x - 8, 2, 16)
             self:drawTextCentre(label, x, 20, 0.96, 0.94, 0.94, 1, UIFont.Small)
         else
@@ -301,7 +304,8 @@ local function updateCompasses()
         local player = getSpecificPlayer(playerNum)
         local state = player and Markers.refresh(player)
         ui.showMapMarkers = optionValue("ShowMapMarkers", true)
-        ui.markerLayout = Markers.layout(optionValue("MapMarkerPosition", 1), ui.showMapMarkers,
+        ui.markerBackground = optionValue("MapMarkerBackground", false)
+        ui.markerLayout = Markers.layout(optionValue("MapMarkerPosition", 2), ui.showMapMarkers,
             state and #state.markers or 0)
         if ui:getHeight() ~= ui.markerLayout.height then ui:setHeight(ui.markerLayout.height) end
         local visible = heading ~= nil

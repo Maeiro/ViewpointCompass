@@ -13,5 +13,6 @@
     "UI_ViewpointCompass_Markers_Position": "Posição das marcações do mapa",
     "UI_ViewpointCompass_Markers_Above": "Acima da bússola",
     "UI_ViewpointCompass_Markers_Inside": "Dentro da bússola",
-    "UI_ViewpointCompass_Markers_Below": "Abaixo da bússola"
+    "UI_ViewpointCompass_Markers_Below": "Abaixo da bússola",
+    "UI_ViewpointCompass_Markers_Background": "Fundo das marcações dentro da bússola"
 }

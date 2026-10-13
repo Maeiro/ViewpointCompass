@@ -103,5 +103,6 @@ assert(inside.rulerY == 0 and inside.markerY == 0 and inside.height == 42 and in
 assert(below.rulerY == 0 and below.markerY == 42 and below.height == 84)
 assert(Markers.layout(1, false, 3).height == 42, "hidden markers reserve no space")
 assert(Markers.layout(1, true, 0).rulerY == 0, "empty selection keeps ruler at top")
-assert(Markers.layout(99, true, 1).rulerY == 42, "invalid position defaults above")
+assert(Markers.layout(99, true, 1).inside, "invalid position defaults inside")
+assert(Markers.layout(nil, true, 1).inside, "missing position defaults inside")
 print("marker_layout_test: PASS")
