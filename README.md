@@ -44,3 +44,14 @@ A customizable, camera-aligned compass ribbon for Project Zomboid, showing your 
 - ZombieBuddy 2.3.0 or newer.
 - Project Zomboid Build 42.21.
 - In multiplayer, install the mod on each client that wants the compass. Do not add it to the server's mod list.
+
+## How client-side multiplayer works
+
+Project Zomboid rebuilds the client's Lua environment when it connects to a server. That environment normally contains Lua from the server's active mod list, so a client-only mod cannot rely on its usual `require` calls after the connection reload. Viewpoint Compass restores its own client code after that reset:
+
+1. The locally installed `42/media/java/client/ViewpointCompass.jar` is loaded by the client's mod loader. Its ZombieBuddy patches run when the main menu and in-game states enter. The in-game update hook retries the bootstrap once per second, up to 30 times, in case Lua is not ready yet.
+2. Once `LuaManager.env` and `LuaManager.exposer` are available, Java runs `ViewpointCompassBootstrap.lua` from the same local mod installation. It uses `getModFileReader("ViewpointCompass", ...)` to read the mod's files by mod ID, then compiles and executes those Lua chunks in dependency order. This bypasses the server's mod list while still using the client's installed copy.
+3. The bootstrap restores the Java bridge globals (`ViewpointCompassClient`, `ViewpointCompass`, and `ViewpointCompassMap`) from ZombieBuddy's `maeiro.viewpointcompass` package tables. ZombieBuddy's normal exposure pass can remove those short aliases after a Lua reload; calling its global re-exposure pass again would erase them again.
+4. After the compass Lua module finishes initialization, it marks itself loaded. Java then stops retrying until the next load cycle. Single-player and other local loads continue to use the regular Lua `require` path.
+
+This is client-only because the UI, camera heading, map-marker selection, and saved marker preferences are all read or drawn by the local player. The server does not need the Compass mod or its Java/Lua files. Each player who wants the compass must install and enable it locally, along with Project Viewpoint and ZombieBuddy, which provide the camera and Java patch APIs it uses.
