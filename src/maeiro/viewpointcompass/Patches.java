@@ -18,7 +18,7 @@ public final class Patches {
     public static class LoadClientLuaAtMainScreen {
         @Patch.OnExit
         public static void exit() {
-            ClientLuaBootstrap.load();
+            ClientLuaBootstrap.beginLoadCycle();
         }
     }
 
@@ -26,7 +26,15 @@ public final class Patches {
     public static class LoadClientLuaOnWorldEnter {
         @Patch.OnExit
         public static void exit() {
-            ClientLuaBootstrap.load();
+            ClientLuaBootstrap.beginLoadCycle();
+        }
+    }
+
+    @Patch(className = "zombie.gameStates.IngameState", methodName = "update", warmUp = true)
+    public static class RetryClientLuaLoadInWorld {
+        @Patch.OnExit
+        public static void exit() {
+            ClientLuaBootstrap.retryIfPending();
         }
     }
 }

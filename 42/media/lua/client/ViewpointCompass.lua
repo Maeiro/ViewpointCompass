@@ -1,7 +1,9 @@
 require "PZAPI/ModOptions"
 require "ISUI/ISUIElement"
-local Markers = require "ViewpointCompass/Markers"
-require "ViewpointCompass/MapIntegration"
+local Markers = ViewpointCompassMarkers or require "ViewpointCompass/Markers"
+if not ViewpointCompassMapIntegrationLoaded then
+    require "ViewpointCompass/MapIntegration"
+end
 
 local MOD_ID = "ViewpointCompass"
 local DEFAULT_WIDTH = 520
@@ -404,3 +406,5 @@ end
 if not initializePlayers() and Events and Events.OnTick then
     Events.OnTick.Add(retryPlayerInitialization)
 end
+
+ViewpointCompassLuaLoaded = true

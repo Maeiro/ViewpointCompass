@@ -1,6 +1,6 @@
 require "ISUI/Maps/ISWorldMapSymbols"
-local Markers = require "ViewpointCompass/Markers"
-local Window = require "ViewpointCompass/MarkerWindow"
+local Markers = ViewpointCompassMarkers or require "ViewpointCompass/Markers"
+local Window = ViewpointCompassMarkerWindow or require "ViewpointCompass/MarkerWindow"
 local Tool = ISWorldMapSymbolTool:derive("ViewpointCompassSelectMarkerTool")
 
 function Tool:onMouseUp(x, y)
@@ -104,4 +104,5 @@ if not ISWorldMapSymbols.viewpointCompassIntegrated then
     end
 end
 
+ViewpointCompassMapIntegrationLoaded = true
 return true

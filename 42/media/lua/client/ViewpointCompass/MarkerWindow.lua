@@ -3,8 +3,9 @@ require "ISUI/ISScrollingListBox"
 require "ISUI/ISButton"
 require "ISUI/ISTextBox"
 require "ISUI/ISModalDialog"
-local Markers = require "ViewpointCompass/Markers"
+local Markers = ViewpointCompassMarkers or require "ViewpointCompass/Markers"
 local Window = ISCollapsableWindow:derive("ViewpointCompassMarkerWindow")
+ViewpointCompassMarkerWindow = Window
 
 function Window:new(symbolsUI)
     local o = ISCollapsableWindow.new(self, symbolsUI.mapUI:getAbsoluteX() + 40,

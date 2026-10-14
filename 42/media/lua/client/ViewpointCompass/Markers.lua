@@ -1,4 +1,5 @@
 local Markers = { states = setmetatable({}, { __mode = "k" }) }
+ViewpointCompassMarkers = Markers
 local KEY = "ViewpointCompassMarkers"
 local fields = { "x", "y", "r", "g", "b", "a", "scale", "rotation", "anchorX", "anchorY", "minZoom", "maxZoom" }
 local fallback = {
