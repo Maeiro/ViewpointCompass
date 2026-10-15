@@ -37,5 +37,8 @@
     "UI_ViewpointCompass_Markers_Above": "罗盘上方",
     "UI_ViewpointCompass_Markers_Inside": "罗盘内部",
     "UI_ViewpointCompass_Markers_Below": "罗盘下方",
-    "UI_ViewpointCompass_Markers_Background": "罗盘内标记的背景"
+    "UI_ViewpointCompass_Markers_Background": "罗盘内标记的背景",
+    "UI_ViewpointCompass_Options_ShowFactionPlayers": "在罗盘上显示附近的同阵营玩家",
+    "UI_ViewpointCompass_Options_ShowFactionPlayersTooltip": "需要服务器安装 Viewpoint Compass。显示 250 米内在线的同阵营玩家。",
+    "UI_ViewpointCompass_Options_FactionPlayerPosition": "阵营玩家标记位置"
 }

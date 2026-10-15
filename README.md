@@ -28,6 +28,7 @@ A customizable, camera-aligned compass ribbon for Project Zomboid, showing your 
 - Selections and custom names persist per character/save, even before opening the map. Ambiguous or missing annotations are not restored to a different destination.
 - Show map markers is enabled by default; disabling it preserves selections. Paper maps are not supported.
 - Place map markers above, inside (default), or below the compass. Inside and below keep the ruler near the top edge; no marker band is reserved when the selection is empty. Inside markers have an optional background, disabled by default. Existing position preferences are preserved.
+- Optionally show nearby online players from your own faction on the compass, with a green player icon and distance. Choose above, inside (default), or below the compass. Locations interpolate smoothly between server updates; the server shares only same-faction positions within 250 meters. This feature is enabled by default and requires Viewpoint Compass on the server.
 
 ## Testing map markers
 
@@ -43,7 +44,13 @@ A customizable, camera-aligned compass ribbon for Project Zomboid, showing your 
 - Project Viewpoint.
 - ZombieBuddy 2.3.0 or newer.
 - Project Zomboid Build 42.21.
-- In multiplayer, install the mod on each client that wants the compass. Do not add it to the server's mod list.
+- In multiplayer, install the mod on each client that wants the compass. The compass and map markers work client-side without the mod on the server; nearby faction-player markers require Viewpoint Compass to be enabled on the server.
+
+## Testing faction players
+
+1. Enable Viewpoint Compass on the server and on each client that wants the compass. Create at least two online players in the same faction and one in a different faction.
+2. Check that only same-faction players within 250 meters appear, with the nearest icon/distance used when icons overlap. Other factions and players farther away must not appear.
+3. Try all three faction marker positions and check that each layout leaves the ruler and selected map markers unobstructed. Turn off Show nearby faction members on compass and verify the markers disappear; re-enable it and check they return. With the mod absent from the server, the rest of the compass should continue working without faction markers.
 
 ## How client-side multiplayer works
 
@@ -54,4 +61,4 @@ Project Zomboid rebuilds the client's Lua environment when it connects to a serv
 3. The bootstrap restores the Java bridge globals (`ViewpointCompassClient`, `ViewpointCompass`, and `ViewpointCompassMap`) from ZombieBuddy's `maeiro.viewpointcompass` package tables. ZombieBuddy's normal exposure pass can remove those short aliases after a Lua reload; calling its global re-exposure pass again would erase them again.
 4. After the compass Lua module finishes initialization, it marks itself loaded. Java then stops retrying until the next load cycle. Single-player and other local loads continue to use the regular Lua `require` path.
 
-This is client-only because the UI, camera heading, map-marker selection, and saved marker preferences are all read or drawn by the local player. The server does not need the Compass mod or its Java/Lua files. Each player who wants the compass must install and enable it locally, along with Project Viewpoint and ZombieBuddy, which provide the camera and Java patch APIs it uses.
+The compass UI, camera heading, map-marker selection, and saved marker preferences are read or drawn locally. These features do not require the server to install the mod. The optional faction-player feature is different: a small server Lua handler receives a request from each client, finds online players sharing the requester's faction, and sends back only their positions within 250 meters. It never sends positions from other factions. To use that feature, enable Viewpoint Compass on the server as well as on clients; clients still need Project Viewpoint and ZombieBuddy for the camera and Java patch APIs.

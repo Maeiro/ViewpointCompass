@@ -75,6 +75,7 @@ if multiplayer then
         "ViewpointCompass/Markers.lua",
         "ViewpointCompass/MarkerWindow.lua",
         "ViewpointCompass/MapIntegration.lua",
+        "ViewpointCompass/FactionPlayers.lua",
         "ViewpointCompass.lua",
     }) do
         local ok = runModLua(relativePath)

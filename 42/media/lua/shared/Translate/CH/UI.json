@@ -37,5 +37,8 @@
     "UI_ViewpointCompass_Markers_Above": "羅盤上方",
     "UI_ViewpointCompass_Markers_Inside": "羅盤內",
     "UI_ViewpointCompass_Markers_Below": "羅盤下方",
-    "UI_ViewpointCompass_Markers_Background": "羅盤內標記背景"
+    "UI_ViewpointCompass_Markers_Background": "羅盤內標記背景",
+    "UI_ViewpointCompass_Options_ShowFactionPlayers": "在羅盤上顯示附近的同陣營玩家",
+    "UI_ViewpointCompass_Options_ShowFactionPlayersTooltip": "需要伺服器安裝 Viewpoint Compass。顯示 250 公尺內線上的同陣營玩家。",
+    "UI_ViewpointCompass_Options_FactionPlayerPosition": "同陣營玩家標記位置"
 }

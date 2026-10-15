@@ -12,6 +12,7 @@ local MAX_WIDTH = 1000
 local HEIGHT = 42
 local PIXELS_PER_DEGREE = 6
 local DEFAULT_LABEL_COLOR = { r = 222 / 255, g = 178 / 255, b = 110 / 255, a = 1 }
+local FactionPlayers = ViewpointCompassFactionPlayers or require "ViewpointCompass/FactionPlayers"
 local function uiText(key, fallback)
     local translated = getTextOrNull and getTextOrNull("UI_ViewpointCompass_" .. key)
     if type(translated) == "string" and translated ~= "" then return translated end
@@ -71,13 +72,39 @@ local LATIN_FALLBACK_DIRECTIONS = { "N", "NE", "E", "SE", "S", "SW", "W", "NW" }
 local uiByPlayer = {}
 
 local options
+local function addFactionPlayersOption(target)
+    target:addTickBox(
+        "ShowFactionPlayers",
+        uiText("Options_ShowFactionPlayers", "Show nearby faction members on compass"),
+        true,
+        uiText("Options_ShowFactionPlayersTooltip",
+            "Requires Viewpoint Compass on the server. Shows online faction members within 250m.")
+    )
+end
+
+local function addFactionPlayerPositionOption(target)
+    local position = target:addComboBox(
+        "FactionPlayerPosition",
+        uiText("Options_FactionPlayerPosition", "Faction player marker position")
+    )
+    for index, key in ipairs({ "Above", "Inside", "Below" }) do
+        position:addItem(Markers.text(key), index == 2)
+    end
+end
+
 local function registerOptions()
     if not PZAPI or not PZAPI.ModOptions then return end
     options = PZAPI.ModOptions:getOptions(MOD_ID)
-    if options then return end
+    if options then
+        if not options:getOption("ShowFactionPlayers") then addFactionPlayersOption(options) end
+        if not options:getOption("FactionPlayerPosition") then addFactionPlayerPositionOption(options) end
+        return
+    end
 
     options = PZAPI.ModOptions:create(MOD_ID, uiText("Name", "Viewpoint Compass"))
     options:addTickBox("ShowCompass", uiText("Options_ShowCompass", "Show directional compass"), true)
+    addFactionPlayersOption(options)
+    addFactionPlayerPositionOption(options)
     options:addTickBox("ShowMapMarkers", Markers.text("Show"), true)
     options:addTickBox("MapMarkerBackground", Markers.text("Background"), false)
     local markerPosition = options:addComboBox("MapMarkerPosition", Markers.text("Position"))
@@ -150,6 +177,12 @@ local function compassWidth()
     local width = optionValue("CompassWidth", DEFAULT_WIDTH)
     if type(width) ~= "number" then return DEFAULT_WIDTH end
     return math.max(MIN_WIDTH, math.min(MAX_WIDTH, width))
+end
+
+local function markerPosition(name)
+    local position = optionValue(name, 2)
+    if type(position) ~= "number" or position < 1 or position > 3 then return 2 end
+    return math.floor(position)
 end
 
 local function compassLanguage()
@@ -294,13 +327,53 @@ function ViewpointCompassUI:render()
         local x = math.max(halfWidth, math.min(width - halfWidth, point.x))
         if layout.inside then
             if self.markerBackground then
-                self:drawRect(x - halfWidth, 0, halfWidth * 2, HEIGHT, 0.96, 0.10, 0.12, 0.14)
+                self:drawRect(x - halfWidth, layout.rulerY, halfWidth * 2, HEIGHT,
+                    0.96, 0.10, 0.12, 0.14)
             end
-            Markers.drawIcon(self, point.marker, x - 8, 2, 16)
-            self:drawTextCentre(label, x, 20, 0.96, 0.94, 0.94, 1, UIFont.Small)
+            Markers.drawIcon(self, point.marker, x - 8, layout.rulerY + 2, 16)
+            self:drawTextCentre(label, x, layout.rulerY + 20, 0.96, 0.94, 0.94, 1, UIFont.Small)
         else
             Markers.drawIcon(self, point.marker, x - 10, layout.markerY + 18, 20)
             self:drawTextCentre(label, x, layout.markerY, 0.96, 0.94, 0.94, 1, UIFont.Small)
+        end
+    end
+
+    local playerTexture = getTexture("media/ui/ViewpointCompass/faction_player.png")
+    for _, point in ipairs(self.factionPlayerPoints or {}) do
+        local label = string.format("%dm", math.floor(point.distance + 0.5))
+        if point.count > 0 then label = label .. " +" .. point.count end
+        local labelWidth = getTextManager():MeasureStringX(UIFont.Small, label)
+        local halfWidth = math.max(10, labelWidth / 2 + 3)
+        local x = math.max(halfWidth, math.min(width - halfWidth, point.x))
+        if self.factionPlayerInside and layout.inside then
+            for _, mapPoint in ipairs(points) do
+                if math.abs(x - mapPoint.x) < 24 then
+                    local offset = x < width / 2 and -24 or 24
+                    if x + offset < halfWidth or x + offset > width - halfWidth then
+                        offset = -offset
+                    end
+                    x = math.max(halfWidth, math.min(width - halfWidth, x + offset))
+                    break
+                end
+            end
+        end
+        local markerY = self.factionPlayerY or 0
+        if self.factionPlayerInside then
+            if playerTexture then
+                self:drawTextureScaled(playerTexture, x - 8, markerY + 2, 16, 16, 1, 1, 1, 1)
+            else
+                self:drawRect(x - 4, markerY + 3, 8, 8, 1, 0.22, 0.86, 0.22)
+                self:drawRect(x - 7, markerY + 12, 14, 8, 1, 0.22, 0.86, 0.22)
+            end
+            self:drawTextCentre(label, x, markerY + 20, 0.96, 0.94, 0.94, 1, UIFont.Small)
+        else
+            if playerTexture then
+                self:drawTextureScaled(playerTexture, x - 10, markerY + 18, 20, 20, 1, 1, 1, 1)
+            else
+                self:drawRect(x - 5, markerY + 20, 10, 10, 1, 0.22, 0.86, 0.22)
+                self:drawRect(x - 9, markerY + 31, 18, 10, 1, 0.22, 0.86, 0.22)
+            end
+            self:drawTextCentre(label, x, markerY, 0.96, 0.94, 0.94, 1, UIFont.Small)
         end
     end
 end
@@ -316,6 +389,9 @@ end
 local function updateCompasses()
     local enabled = optionValue("ShowCompass", true)
     local requireCompassItem = optionValue("RequireCompassItem", false)
+    local showFactionPlayers = optionValue("ShowFactionPlayers", true)
+    local mapPosition = markerPosition("MapMarkerPosition")
+    local factionPlayerPosition = markerPosition("FactionPlayerPosition")
     local configuredWidth = compassWidth()
     local language = compassLanguage()
     local languageCode = gameLanguageCode()
@@ -324,19 +400,36 @@ local function updateCompasses()
     for playerNum, ui in pairs(uiByPlayer) do
         local player = getSpecificPlayer(playerNum)
         local state = player and Markers.refresh(player)
+        local peers = showFactionPlayers and heading and FactionPlayers.getPlayers() or {}
+        local nearbyFactionPlayers = player and FactionPlayers.hasNearby(player, peers)
+        local left, top, screenWidth = playerScreenBounds(playerNum)
+        local width = screenWidth and math.min(configuredWidth, screenWidth) or configuredWidth
         ui.showMapMarkers = optionValue("ShowMapMarkers", true)
         ui.markerBackground = optionValue("MapMarkerBackground", false)
-        ui.markerLayout = Markers.layout(optionValue("MapMarkerPosition", 2), ui.showMapMarkers,
-            state and #state.markers or 0)
-        if ui:getHeight() ~= ui.markerLayout.height then ui:setHeight(ui.markerLayout.height) end
+        local mapMarkerCount = state and #state.markers or 0
+        local hasMapMarkers = ui.showMapMarkers and mapMarkerCount > 0
+        local hasNearbyPlayers = nearbyFactionPlayers == true
+        local combinedLayout = FactionPlayers.layout(
+            mapPosition, hasMapMarkers, factionPlayerPosition, hasNearbyPlayers, HEIGHT
+        )
+        local layout = Markers.layout(mapPosition, ui.showMapMarkers, mapMarkerCount)
+        layout.rulerY = combinedLayout.rulerY
+        layout.height = combinedLayout.height
+        layout.inside = combinedLayout.mapInside
+        layout.markerY = combinedLayout.mapY
+        ui.markerLayout = layout
+        ui.factionPlayerInside = combinedLayout.playerInside
+        ui.factionPlayerY = combinedLayout.playerY
+        ui.factionPlayerPoints = hasNearbyPlayers
+            and FactionPlayers.project(player, peers, heading, width, PIXELS_PER_DEGREE) or {}
+        local height = layout.height
+        if ui:getHeight() ~= height then ui:setHeight(height) end
         local visible = heading ~= nil
             and (not requireCompassItem or hasCompassItem(playerNum))
         if ui:getIsVisible() ~= visible then
             ui:setVisible(visible)
         end
         if visible then
-            local left, top, screenWidth = playerScreenBounds(playerNum)
-            local width = screenWidth and math.min(configuredWidth, screenWidth) or configuredWidth
             if ui:getWidth() ~= width then
                 ui:setWidth(width)
             end
@@ -393,6 +486,12 @@ end
 
 if Events and Events.OnPreUIDraw then
     Events.OnPreUIDraw.Add(updateCompasses)
+end
+
+if Events and Events.OnTick then
+    Events.OnTick.Add(function()
+        FactionPlayers.update(optionValue("ShowCompass", true) and optionValue("ShowFactionPlayers", true))
+    end)
 end
 
 if Events and Events.OnSave then

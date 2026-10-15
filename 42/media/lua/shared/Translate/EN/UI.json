@@ -61,5 +61,8 @@
     "UI_ViewpointCompass_Markers_Above": "Above the compass",
     "UI_ViewpointCompass_Markers_Inside": "Inside the compass",
     "UI_ViewpointCompass_Markers_Below": "Below the compass",
-    "UI_ViewpointCompass_Markers_Background": "Background for markers inside the compass"
+    "UI_ViewpointCompass_Markers_Background": "Background for markers inside the compass",
+    "UI_ViewpointCompass_Options_ShowFactionPlayers": "Show nearby faction members on compass",
+    "UI_ViewpointCompass_Options_ShowFactionPlayersTooltip": "Requires Viewpoint Compass on the server. Shows online faction members within 250m.",
+    "UI_ViewpointCompass_Options_FactionPlayerPosition": "Faction player marker position"
 }

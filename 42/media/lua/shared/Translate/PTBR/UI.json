@@ -14,5 +14,8 @@
     "UI_ViewpointCompass_Markers_Above": "Acima da bússola",
     "UI_ViewpointCompass_Markers_Inside": "Dentro da bússola",
     "UI_ViewpointCompass_Markers_Below": "Abaixo da bússola",
-    "UI_ViewpointCompass_Markers_Background": "Fundo das marcações dentro da bússola"
+    "UI_ViewpointCompass_Markers_Background": "Fundo das marcações dentro da bússola",
+    "UI_ViewpointCompass_Options_ShowFactionPlayers": "Exibir membros próximos da facção na bússola",
+    "UI_ViewpointCompass_Options_ShowFactionPlayersTooltip": "Requer Viewpoint Compass no servidor. Exibe membros online da sua facção a até 250 m.",
+    "UI_ViewpointCompass_Options_FactionPlayerPosition": "Posição dos aliados na bússola"
 }
