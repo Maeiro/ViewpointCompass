@@ -1,4 +1,8 @@
 {
+    "UI_ViewpointCompass_Options_DirectionOnly": "Exibir somente a direção",
+    "UI_ViewpointCompass_Options_DirectionOnlyTooltip": "Exibe apenas a direção atual (cardinal ou intercardinal); oculta a régua, os graus, as marcações do mapa e os membros da facção.",
+    "UI_ViewpointCompass_Options_OpenWaypointManagerKey": "Abrir gerenciamento de destinos",
+    "UI_ViewpointCompass_Options_OpenWaypointManagerKeyTooltip": "Abre ou fecha as marcações da bússola. Defina como Nenhuma para desativar o atalho.",
     "UI_ViewpointCompass_Markers_Add": "Adicionar à bússola",
     "UI_ViewpointCompass_Markers_Manage": "Marcações da bússola",
     "UI_ViewpointCompass_Markers_Show": "Exibir marcações do mapa",

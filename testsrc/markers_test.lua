@@ -94,6 +94,38 @@ local grouped = Markers.project(p, { point(0, -50), point(0, -20), point(0, -30)
 check(#grouped == 1 and grouped[1].distance == 20 and grouped[1].count == 2, "nearest +N grouping")
 local adjacent = Markers.project(p, { point(0, -50), point(5, -50) }, 0, 520, 6)
 check(#adjacent == 2, "separated icons stay individual")
+
+MapSymbolDefinitions = { getInstance = function()
+    return { getSymbolById = function() return { getTexturePath = function() return "marker" end } end }
+end }
+function getTexture(path) return path end
+local palette = {
+    { 0, 0, 0, 1 },
+    { 0.5, 0.5, 0.5, 0 },
+    { 1, 0, 0, 0 },
+    { 0, 0, 1, 1 },
+    { 0, 1, 0, 0 },
+}
+for _, color in ipairs(palette) do
+    local draws = {}
+    local ui = { drawTextureScaled = function(_, texture, x, y, width, height, alpha, r, g, b)
+        draws[#draws + 1] = { texture, x, y, width, height, alpha, r, g, b }
+    end }
+    local marker = { signature = { text = false, content = "marker", a = 1,
+        r = color[1], g = color[2], b = color[3] } }
+    Markers.drawIcon(ui, marker, 20, 30, 16)
+    local outline = color[4]
+    local shadow = 1 - outline
+    check(#draws == 10, "icon has offset shadow, eight outline pixels, and original color")
+    check(draws[1][2] == 21 and draws[1][3] == 31 and draws[1][6] == 0.7
+        and draws[1][7] == shadow and draws[1][8] == shadow and draws[1][9] == shadow,
+        "icon shadow contrasts with marker color")
+    check(draws[2][6] == 1 and draws[2][7] == outline
+        and draws[2][8] == outline and draws[2][9] == outline, "outline adapts to marker luminance")
+    local original = draws[#draws]
+    check(original[2] == 20 and original[3] == 30 and original[7] == color[1]
+        and original[8] == color[2] and original[9] == color[3], "original marker color is preserved")
+end
 print("markers_test: PASS")
 local above = Markers.layout(1, true, 1)
 local inside = Markers.layout(2, true, 1)

@@ -17,14 +17,17 @@ A customizable, camera-aligned compass ribbon for Project Zomboid, showing your 
 - Renders behind game windows such as the inventory.
 - Follows Viewpoint's free-look camera.
 - Enabled by default and configurable through Mod Options.
+- Optional direction-only display, disabled by default. It keeps the current localized cardinal/intercardinal direction and hides the ruler, degree readout, map markers, and faction-player markers.
 - Client-side multiplayer support: each player installs the mod locally; the server does not need to enable it.
 - Optionally require the vanilla Compass item to be carried (disabled by default).
 - Hidden automatically while Viewpoint is inactive.
 - Opt-in destinations from symbols and notes on the main world map (M), with their colors, camera-relative icons and distance in meters (one tile = one meter).
 - Add to Compass selects an existing annotation; Esc or right click cancels. No annotations are selected automatically.
 - Compass Markers provides a scrollable list with names, distances and coordinates: rename, locate on the map, remove one, or remove all with confirmation. Removing destinations does not erase map annotations.
+- Open or close Compass Markers with the configurable hotkey, default `[`, without opening the map. Locating a destination opens the world map and centers it on that marker.
 - Markers follow map edits and disappear when their source is deleted; reaching a destination does not remove it.
 - Nearby ribbon icons are grouped within 24 pixels, showing the nearest destination and a count of the remaining points.
+- Map-marker icons use a luminance-aware contrasting outline and a subtle distance-text shadow, keeping black, gray, and colored symbols readable against changing scenes.
 - Selections and custom names persist per character/save, even before opening the map. Ambiguous or missing annotations are not restored to a different destination.
 - Show map markers is enabled by default; disabling it preserves selections. Paper maps are not supported.
 - Place map markers above, inside (default), or below the compass. Inside and below keep the ruler near the top edge; no marker band is reserved when the selection is empty. Inside markers have an optional background, disabled by default. Existing position preferences are preserved.

@@ -1,6 +1,10 @@
 {
     "UI_ViewpointCompass_Name": "Viewpoint 指南針",
     "UI_ViewpointCompass_Options_ShowCompass": "顯示方向羅盤",
+    "UI_ViewpointCompass_Options_DirectionOnly": "僅顯示方向",
+    "UI_ViewpointCompass_Options_DirectionOnlyTooltip": "僅顯示目前方位（基點或中間方位）；隱藏刻度、度數、地圖標記與同陣營玩家。",
+    "UI_ViewpointCompass_Options_OpenWaypointManagerKey": "開啟航點管理",
+    "UI_ViewpointCompass_Options_OpenWaypointManagerKeyTooltip": "開啟或關閉羅盤標記視窗。設為「無」可停用此快捷鍵。",
     "UI_ViewpointCompass_Options_RequireCompassItem": "必須攜帶指南針物品才能顯示羅盤",
     "UI_ViewpointCompass_Options_RequireCompassItemTooltip": "啟用後，必須在物品欄或隨身包中攜帶原版指南針。",
     "UI_ViewpointCompass_Options_CompassWidth": "羅盤寬度（像素）",

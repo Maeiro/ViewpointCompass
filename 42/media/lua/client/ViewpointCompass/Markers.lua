@@ -12,6 +12,24 @@ local fallback = {
     Below = "Below the compass",
     Background = "Background for markers inside the compass",
 }
+local iconOutlineOffsets = {
+    { -1, -1 }, { 0, -1 }, { 1, -1 }, { -1, 0 }, { 1, 0 },
+    { -1, 1 }, { 0, 1 }, { 1, 1 },
+}
+
+local function channelLuminance(value)
+    value = math.max(0, math.min(1, value or 0))
+    if value <= 0.04045 then return value / 12.92 end
+    return ((value + 0.055) / 1.055) ^ 2.4
+end
+
+local function markerOutlineColors(signature)
+    local luminance = 0.2126 * channelLuminance(signature.r)
+        + 0.7152 * channelLuminance(signature.g)
+        + 0.0722 * channelLuminance(signature.b)
+    local outline = luminance < 0.179 and 1 or 0
+    return outline, 1 - outline
+end
 
 function Markers.text(key)
     return (getTextOrNull and getTextOrNull("UI_ViewpointCompass_Markers_" .. key)) or fallback[key] or key
@@ -203,12 +221,23 @@ function Markers.drawIcon(ui, marker, x, y, size)
     local s = marker.signature
     local definition = not s.text and MapSymbolDefinitions.getInstance():getSymbolById(s.content)
     local texture = definition and getTexture(definition:getTexturePath())
+    local outline, shadow = markerOutlineColors(s)
+    local alpha = type(s.a) == "number" and math.max(0, math.min(1, s.a)) or 1
     if texture then
-        ui:drawTextureScaled(texture, x, y, size, size, s.a, s.r, s.g, s.b)
+        ui:drawTextureScaled(texture, x + 1, y + 1, size, size, alpha * 0.7, shadow, shadow, shadow)
+        for _, offset in ipairs(iconOutlineOffsets) do
+            ui:drawTextureScaled(texture, x + offset[1], y + offset[2], size, size,
+                alpha, outline, outline, outline)
+        end
+        ui:drawTextureScaled(texture, x, y, size, size, alpha, s.r, s.g, s.b)
     else
-        ui:drawRectBorder(x + 3, y + 2, size - 6, size - 4, s.a, s.r, s.g, s.b)
-        ui:drawRect(x + 6, y + 6, size - 12, 1, s.a, s.r, s.g, s.b)
-        ui:drawRect(x + 6, y + 10, size - 12, 1, s.a, s.r, s.g, s.b)
+        ui:drawRectBorder(x + 2, y + 1, size - 4, size - 2, alpha, outline, outline, outline)
+        ui:drawRectBorder(x + 4, y + 3, size - 4, size - 2, alpha * 0.7, shadow, shadow, shadow)
+        ui:drawRectBorder(x + 3, y + 2, size - 6, size - 4, alpha, s.r, s.g, s.b)
+        ui:drawRect(x + 7, y + 7, size - 12, 1, alpha * 0.7, shadow, shadow, shadow)
+        ui:drawRect(x + 7, y + 11, size - 12, 1, alpha * 0.7, shadow, shadow, shadow)
+        ui:drawRect(x + 6, y + 6, size - 12, 1, alpha, s.r, s.g, s.b)
+        ui:drawRect(x + 6, y + 10, size - 12, 1, alpha, s.r, s.g, s.b)
     end
 end
 

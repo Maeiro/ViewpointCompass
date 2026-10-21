@@ -6,10 +6,12 @@ if not ViewpointCompassMapIntegrationLoaded then
 end
 
 local MOD_ID = "ViewpointCompass"
+local MarkerWindow = ViewpointCompassMarkerWindow or require "ViewpointCompass/MarkerWindow"
 local DEFAULT_WIDTH = 520
 local MIN_WIDTH = 360
 local MAX_WIDTH = 1000
 local HEIGHT = 42
+local DIRECTION_ONLY_HEIGHT = 22
 local PIXELS_PER_DEGREE = 6
 local DEFAULT_LABEL_COLOR = { r = 222 / 255, g = 178 / 255, b = 110 / 255, a = 1 }
 local FactionPlayers = ViewpointCompassFactionPlayers or require "ViewpointCompass/FactionPlayers"
@@ -72,6 +74,25 @@ local LATIN_FALLBACK_DIRECTIONS = { "N", "NE", "E", "SE", "S", "SW", "W", "NW" }
 local uiByPlayer = {}
 
 local options
+local function addDirectionOnlyOption(target)
+    target:addTickBox(
+        "DirectionOnly",
+        uiText("Options_DirectionOnly", "Show only the direction"),
+        false,
+        uiText("Options_DirectionOnlyTooltip",
+            "Show only the current cardinal/intercardinal direction; hide the ruler, degrees, map markers, and faction players.")
+    )
+end
+
+local function addWaypointManagerKeyOption(target)
+    target:addKeyBind(
+        "OpenWaypointManagerKey",
+        uiText("Options_OpenWaypointManagerKey", "Open waypoint management"),
+        Keyboard.KEY_LBRACKET,
+        uiText("Options_OpenWaypointManagerKeyTooltip", "Open or close Compass Markers. Set to None to disable the shortcut.")
+    )
+end
+
 local function addFactionPlayersOption(target)
     target:addTickBox(
         "ShowFactionPlayers",
@@ -96,6 +117,8 @@ local function registerOptions()
     if not PZAPI or not PZAPI.ModOptions then return end
     options = PZAPI.ModOptions:getOptions(MOD_ID)
     if options then
+        if not options:getOption("DirectionOnly") then addDirectionOnlyOption(options) end
+        if not options:getOption("OpenWaypointManagerKey") then addWaypointManagerKeyOption(options) end
         if not options:getOption("ShowFactionPlayers") then addFactionPlayersOption(options) end
         if not options:getOption("FactionPlayerPosition") then addFactionPlayerPositionOption(options) end
         return
@@ -103,6 +126,8 @@ local function registerOptions()
 
     options = PZAPI.ModOptions:create(MOD_ID, uiText("Name", "Viewpoint Compass"))
     options:addTickBox("ShowCompass", uiText("Options_ShowCompass", "Show directional compass"), true)
+    addDirectionOnlyOption(options)
+    addWaypointManagerKeyOption(options)
     addFactionPlayersOption(options)
     addFactionPlayerPositionOption(options)
     options:addTickBox("ShowMapMarkers", Markers.text("Show"), true)
@@ -171,6 +196,11 @@ end
 
 local function shortestAngle(angle)
     return (angle + 540) % 360 - 180
+end
+
+local function drawMarkerDistance(ui, label, x, y)
+    ui:drawTextCentre(label, x + 1, y + 1, 0.02, 0.02, 0.02, 0.78, UIFont.Small)
+    ui:drawTextCentre(label, x, y, 0.96, 0.94, 0.94, 1, UIFont.Small)
 end
 
 local function compassWidth()
@@ -267,6 +297,13 @@ function ViewpointCompassUI:render()
     local width = self:getWidth()
     local centerX = width / 2
     local heading = self.heading
+    if self.directionOnly then
+        local direction = directionAtBearing(heading, self.language, self.languageCode)
+        local labelColor = self.labelColor
+        self:drawTextCentre(direction, centerX, 2,
+            labelColor.r, labelColor.g, labelColor.b, labelColor.a, UIFont.Small)
+        return
+    end
     local halfRange = width / (2 * PIXELS_PER_DEGREE)
     local labelColor = self.labelColor
     local layout = self.markerLayout or Markers.layout(2, false, 0)
@@ -331,10 +368,10 @@ function ViewpointCompassUI:render()
                     0.96, 0.10, 0.12, 0.14)
             end
             Markers.drawIcon(self, point.marker, x - 8, layout.rulerY + 2, 16)
-            self:drawTextCentre(label, x, layout.rulerY + 20, 0.96, 0.94, 0.94, 1, UIFont.Small)
+            drawMarkerDistance(self, label, x, layout.rulerY + 20)
         else
             Markers.drawIcon(self, point.marker, x - 10, layout.markerY + 18, 20)
-            self:drawTextCentre(label, x, layout.markerY, 0.96, 0.94, 0.94, 1, UIFont.Small)
+            drawMarkerDistance(self, label, x, layout.markerY)
         end
     end
 
@@ -365,7 +402,7 @@ function ViewpointCompassUI:render()
                 self:drawRect(x - 4, markerY + 3, 8, 8, 1, 0.22, 0.86, 0.22)
                 self:drawRect(x - 7, markerY + 12, 14, 8, 1, 0.22, 0.86, 0.22)
             end
-            self:drawTextCentre(label, x, markerY + 20, 0.96, 0.94, 0.94, 1, UIFont.Small)
+            drawMarkerDistance(self, label, x, markerY + 20)
         else
             if playerTexture then
                 self:drawTextureScaled(playerTexture, x - 10, markerY + 18, 20, 20, 1, 1, 1, 1)
@@ -373,7 +410,7 @@ function ViewpointCompassUI:render()
                 self:drawRect(x - 5, markerY + 20, 10, 10, 1, 0.22, 0.86, 0.22)
                 self:drawRect(x - 9, markerY + 31, 18, 10, 1, 0.22, 0.86, 0.22)
             end
-            self:drawTextCentre(label, x, markerY, 0.96, 0.94, 0.94, 1, UIFont.Small)
+            drawMarkerDistance(self, label, x, markerY)
         end
     end
 end
@@ -388,6 +425,7 @@ end
 
 local function updateCompasses()
     local enabled = optionValue("ShowCompass", true)
+    local directionOnly = optionValue("DirectionOnly", false)
     local requireCompassItem = optionValue("RequireCompassItem", false)
     local showFactionPlayers = optionValue("ShowFactionPlayers", true)
     local mapPosition = markerPosition("MapMarkerPosition")
@@ -399,16 +437,17 @@ local function updateCompasses()
     local heading = enabled and cameraHeading() or nil
     for playerNum, ui in pairs(uiByPlayer) do
         local player = getSpecificPlayer(playerNum)
-        local state = player and Markers.refresh(player)
+        local state = not directionOnly and player and Markers.refresh(player)
         local peers = showFactionPlayers and heading and FactionPlayers.getPlayers() or {}
-        local nearbyFactionPlayers = player and FactionPlayers.hasNearby(player, peers)
+        local nearbyFactionPlayers = not directionOnly and player and FactionPlayers.hasNearby(player, peers)
         local left, top, screenWidth = playerScreenBounds(playerNum)
         local width = screenWidth and math.min(configuredWidth, screenWidth) or configuredWidth
-        ui.showMapMarkers = optionValue("ShowMapMarkers", true)
+        ui.directionOnly = directionOnly
+        ui.showMapMarkers = not directionOnly and optionValue("ShowMapMarkers", true)
         ui.markerBackground = optionValue("MapMarkerBackground", false)
         local mapMarkerCount = state and #state.markers or 0
         local hasMapMarkers = ui.showMapMarkers and mapMarkerCount > 0
-        local hasNearbyPlayers = nearbyFactionPlayers == true
+        local hasNearbyPlayers = not directionOnly and nearbyFactionPlayers == true
         local combinedLayout = FactionPlayers.layout(
             mapPosition, hasMapMarkers, factionPlayerPosition, hasNearbyPlayers, HEIGHT
         )
@@ -422,7 +461,7 @@ local function updateCompasses()
         ui.factionPlayerY = combinedLayout.playerY
         ui.factionPlayerPoints = hasNearbyPlayers
             and FactionPlayers.project(player, peers, heading, width, PIXELS_PER_DEGREE) or {}
-        local height = layout.height
+        local height = directionOnly and DIRECTION_ONLY_HEIGHT or layout.height
         if ui:getHeight() ~= height then ui:setHeight(height) end
         local visible = heading ~= nil
             and (not requireCompassItem or hasCompassItem(playerNum))
@@ -491,6 +530,14 @@ end
 if Events and Events.OnTick then
     Events.OnTick.Add(function()
         FactionPlayers.update(optionValue("ShowCompass", true) and optionValue("ShowFactionPlayers", true))
+    end)
+end
+
+if Events and Events.OnKeyPressed then
+    Events.OnKeyPressed.Add(function(key)
+        local player = getSpecificPlayer(0)
+        if not player or key ~= optionValue("OpenWaypointManagerKey", Keyboard.KEY_LBRACKET) then return end
+        MarkerWindow.toggle(player:getPlayerNum())
     end)
 end
 

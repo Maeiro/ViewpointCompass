@@ -1,6 +1,10 @@
 {
     "UI_ViewpointCompass_Name": "Viewpoint Compass",
     "UI_ViewpointCompass_Options_ShowCompass": "Show directional compass",
+    "UI_ViewpointCompass_Options_DirectionOnly": "Show only the direction",
+    "UI_ViewpointCompass_Options_DirectionOnlyTooltip": "Show only the current cardinal/intercardinal direction; hide the ruler, degrees, map markers, and faction players.",
+    "UI_ViewpointCompass_Options_OpenWaypointManagerKey": "Open waypoint management",
+    "UI_ViewpointCompass_Options_OpenWaypointManagerKeyTooltip": "Open or close Compass Markers. Set to None to disable the shortcut.",
     "UI_ViewpointCompass_Options_RequireCompassItem": "Require a Compass item to show the compass",
     "UI_ViewpointCompass_Options_RequireCompassItemTooltip": "When enabled, you must carry the vanilla Compass item in your inventory or a carried bag.",
     "UI_ViewpointCompass_Options_CompassWidth": "Compass width (pixels)",

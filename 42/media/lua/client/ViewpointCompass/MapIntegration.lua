@@ -56,15 +56,7 @@ if not ISWorldMapSymbols.viewpointCompassIntegrated then
         self.compassAddButton.tooltip = Markers.text("Select")
         self.compassManageButton = addButton(self, "Manage", function(panel)
             panel:setCurrentTool(nil)
-            if panel.compassMarkerWindow then
-                panel.compassMarkerWindow:bringToTop()
-                return
-            end
-            local window = Window:new(panel)
-            window:initialise()
-            window:addToUIManager()
-            window:bringToTop()
-            panel.compassMarkerWindow = window
+            Window.open(panel.playerNum, panel)
         end)
     end
 

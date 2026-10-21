@@ -1,6 +1,10 @@
 {
     "UI_ViewpointCompass_Name": "Viewpoint 指南针",
     "UI_ViewpointCompass_Options_ShowCompass": "显示方向罗盘",
+    "UI_ViewpointCompass_Options_DirectionOnly": "仅显示方向",
+    "UI_ViewpointCompass_Options_DirectionOnlyTooltip": "仅显示当前方位（基点或中间方位）；隐藏刻度、度数、地图标记和同阵营玩家。",
+    "UI_ViewpointCompass_Options_OpenWaypointManagerKey": "打开路径点管理",
+    "UI_ViewpointCompass_Options_OpenWaypointManagerKeyTooltip": "打开或关闭罗盘标记窗口。设为“无”可禁用此快捷键。",
     "UI_ViewpointCompass_Options_RequireCompassItem": "需要携带指南针物品以显示罗盘",
     "UI_ViewpointCompass_Options_RequireCompassItemTooltip": "启用后，需在物品栏或随身包中携带原版指南针。",
     "UI_ViewpointCompass_Options_CompassWidth": "罗盘宽度（像素）",

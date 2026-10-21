@@ -6,15 +6,52 @@ require "ISUI/ISModalDialog"
 local Markers = ViewpointCompassMarkers or require "ViewpointCompass/Markers"
 local Window = ISCollapsableWindow:derive("ViewpointCompassMarkerWindow")
 ViewpointCompassMarkerWindow = Window
+Window.instances = {}
 
-function Window:new(symbolsUI)
-    local o = ISCollapsableWindow.new(self, symbolsUI.mapUI:getAbsoluteX() + 40,
-        symbolsUI.mapUI:getAbsoluteY() + 40, 560, 380)
+function Window:new(symbolsUI, playerNum)
+    playerNum = symbolsUI and symbolsUI.playerNum or playerNum or 0
+    local x, y
+    if symbolsUI and symbolsUI.mapUI then
+        x = symbolsUI.mapUI:getAbsoluteX() + 40
+        y = symbolsUI.mapUI:getAbsoluteY() + 40
+    else
+        x = (getCore():getScreenWidth() - 560) / 2
+        y = (getCore():getScreenHeight() - 380) / 2
+    end
+    local o = ISCollapsableWindow.new(self, x, y, 560, 380)
     o.symbolsUI = symbolsUI
-    o.player = getSpecificPlayer(symbolsUI.playerNum)
+    o.playerNum = playerNum
+    o.player = getSpecificPlayer(playerNum)
     o.title = Markers.text("Manage")
     o.resizable = false
     return o
+end
+
+function Window.open(playerNum, symbolsUI)
+    playerNum = symbolsUI and symbolsUI.playerNum or playerNum or 0
+    local current = Window.instances[playerNum]
+        or (symbolsUI and symbolsUI.compassMarkerWindow)
+    if current and current:getIsVisible() then
+        current:bringToTop()
+        return current
+    end
+    local window = Window:new(symbolsUI, playerNum)
+    window:initialise()
+    window:addToUIManager()
+    window:bringToTop()
+    Window.instances[playerNum] = window
+    if symbolsUI then symbolsUI.compassMarkerWindow = window end
+    return window
+end
+
+function Window.toggle(playerNum)
+    playerNum = playerNum or 0
+    local current = Window.instances[playerNum]
+    if current and current:getIsVisible() then
+        current:close()
+        return nil
+    end
+    return Window.open(playerNum)
 end
 
 function Window:createChildren()
@@ -60,7 +97,7 @@ end
 
 function Window:update()
     ISCollapsableWindow.update(self)
-    if not self.symbolsUI.mapUI:isReallyVisible() then self:close(); return end
+    if self.symbolsUI and not self.symbolsUI.mapUI:isReallyVisible() then self:close(); return end
     local state = Markers.refresh(self.player)
     if not state then return end
     if self.revision ~= state.revision then
@@ -94,7 +131,7 @@ function Window:onAction(button)
     local action = button.internal
     if action == "Rename" and marker then
         local modal = ISTextBox:new(self.x + 40, self.y + 60, 380, 160, Markers.text("Rename"),
-            Markers.name(marker), self, self.onRename, self.symbolsUI.playerNum, marker)
+            Markers.name(marker), self, self.onRename, self.playerNum, marker)
         modal:initialise()
         modal:addToUIManager()
         modal:setAlwaysOnTop(true)
@@ -103,9 +140,23 @@ function Window:onAction(button)
         local state = Markers.refresh(self.player, true)
         for _, current in ipairs(state.markers) do
             if current == marker then
-                self.symbolsUI:setCurrentTool(nil)
-                self.symbolsUI.mapAPI:centerOn(marker.signature.x, marker.signature.y)
-                self:close()
+                local x, y = marker.signature.x, marker.signature.y
+                if self.symbolsUI then
+                    self.symbolsUI:setCurrentTool(nil)
+                    self.symbolsUI.mapAPI:centerOn(x, y)
+                    self:close()
+                    return
+                end
+                if not ISWorldMap then require "ISUI/Maps/ISWorldMap" end
+                if ISWorldMap and ISWorldMap.ShowWorldMap then
+                    ISWorldMap.ShowWorldMap(self.playerNum, x, y, 18.0)
+                    local map = ISWorldMap_instance
+                    if map and map.mapAPI and map.symbolsUI then
+                        map.mapAPI:centerOn(x, y)
+                        map.mapAPI:setZoom(18.0)
+                        self:close()
+                    end
+                end
                 return
             end
         end
@@ -113,7 +164,7 @@ function Window:onAction(button)
         Markers.remove(self.player, marker)
     elseif action == "RemoveAll" then
         local modal = ISModalDialog:new(self.x + 40, self.y + 60, 420, 160,
-            Markers.text("Confirm"), true, self, self.onRemoveAll, self.symbolsUI.playerNum)
+            Markers.text("Confirm"), true, self, self.onRemoveAll, self.playerNum)
         modal:initialise()
         modal:addToUIManager()
         modal:setAlwaysOnTop(true)
@@ -131,7 +182,10 @@ end
 function Window:close()
     ISCollapsableWindow.close(self)
     self:removeFromUIManager()
-    self.symbolsUI.compassMarkerWindow = nil
+    if Window.instances[self.playerNum] == self then Window.instances[self.playerNum] = nil end
+    if self.symbolsUI and self.symbolsUI.compassMarkerWindow == self then
+        self.symbolsUI.compassMarkerWindow = nil
+    end
 end
 
 return Window
