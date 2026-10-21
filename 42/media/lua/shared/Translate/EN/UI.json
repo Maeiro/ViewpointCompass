@@ -6,8 +6,10 @@
     "UI_ViewpointCompass_Options_OpenWaypointManagerKey": "Open waypoint management",
     "UI_ViewpointCompass_Options_OpenWaypointManagerKeyTooltip": "Open or close Compass Markers. Set to None to disable the shortcut.",
     "UI_ViewpointCompass_Options_RequireCompassItem": "Require a Compass item to show the compass",
-    "UI_ViewpointCompass_Options_RequireCompassItemTooltip": "When enabled, you must carry the vanilla Compass item in your inventory or a carried bag.",
+    "UI_ViewpointCompass_Options_RequireCompassItemTooltip": "When enabled, you must carry the vanilla Compass item. The server can enforce this requirement.",
     "UI_ViewpointCompass_Options_CompassWidth": "Compass width (pixels)",
+    "UI_ViewpointCompass_Options_CompassScale": "Compass size (%)",
+    "UI_ViewpointCompass_Options_CompassScaleTooltip": "Scales the entire compass, including its labels, ticks, and markers.",
     "UI_ViewpointCompass_Options_CompassLabelColor": "Compass direction label color",
     "UI_ViewpointCompass_Options_CompassLanguage": "Compass direction language",
     "UI_ViewpointCompass_Language_English": "English",
@@ -67,6 +69,8 @@
     "UI_ViewpointCompass_Markers_Below": "Below the compass",
     "UI_ViewpointCompass_Markers_Background": "Background for markers inside the compass",
     "UI_ViewpointCompass_Options_ShowFactionPlayers": "Show nearby faction members on compass",
-    "UI_ViewpointCompass_Options_ShowFactionPlayersTooltip": "Requires Viewpoint Compass on the server. Shows online faction members within 250m.",
+    "UI_ViewpointCompass_Options_ShowFactionPlayersTooltip": "Requires Viewpoint Compass on the server. The server can disable this feature or limit its range.",
+    "UI_ViewpointCompass_Options_FactionPlayerRange": "Faction player detection range (meters)",
+    "UI_ViewpointCompass_Options_FactionPlayerRangeTooltip": "Detect same-faction players within 25–1000 meters, up to the server's configured maximum. Default: 250 meters.",
     "UI_ViewpointCompass_Options_FactionPlayerPosition": "Faction player marker position"
 }

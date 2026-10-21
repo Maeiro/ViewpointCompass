@@ -74,6 +74,7 @@ if multiplayer then
     for _, relativePath in ipairs({
         "ViewpointCompass/Markers.lua",
         "ViewpointCompass/MarkerWindow.lua",
+        "ViewpointCompass/ServerPolicy.lua",
         "ViewpointCompass/MapIntegration.lua",
         "ViewpointCompass/FactionPlayers.lua",
         "ViewpointCompass.lua",

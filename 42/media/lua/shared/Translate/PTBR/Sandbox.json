@@ -1,0 +1,13 @@
+{
+    "Sandbox_ViewpointCompass_Page": "Viewpoint Compass",
+    "Sandbox_ViewpointCompass_RequireCompassItem": "Exigir uma bússola no inventário para exibir o compasso",
+    "Sandbox_ViewpointCompass_RequireCompassItem_tooltip": "Os jogadores precisam carregar a bússola original para ver o compasso, independentemente da configuração local.",
+    "Sandbox_ViewpointCompass_AllowMapWaypoints": "Permitir destinos do mapa no compasso",
+    "Sandbox_ViewpointCompass_AllowMapWaypoints_tooltip": "Quando desativado, não é possível adicionar nem exibir marcações do mapa no compasso. As seleções salvas são mantidas.",
+    "Sandbox_ViewpointCompass_AllowFactionPlayers": "Permitir marcadores de jogadores da facção",
+    "Sandbox_ViewpointCompass_AllowFactionPlayers_tooltip": "Quando desativado, o servidor não compartilha a localização dos membros da facção com os clientes.",
+    "Sandbox_ViewpointCompass_MaxFactionPlayerRange": "Alcance máximo de detecção dos jogadores da facção (metros)",
+    "Sandbox_ViewpointCompass_MaxFactionPlayerRange_tooltip": "Limita o alcance escolhido por cada cliente. O servidor nunca compartilha localizações além dessa distância.",
+    "Sandbox_ViewpointCompass_ShowFactionPlayerDistance": "Exibir distância dos jogadores da facção",
+    "Sandbox_ViewpointCompass_ShowFactionPlayerDistance_tooltip": "Quando desativado, os clientes recebem apenas a direção dos membros da facção, sem coordenadas ou distância exata."
+}

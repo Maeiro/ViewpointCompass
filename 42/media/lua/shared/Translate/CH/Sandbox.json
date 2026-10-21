@@ -1,0 +1,13 @@
+{
+    "Sandbox_ViewpointCompass_Page": "Viewpoint 指南針",
+    "Sandbox_ViewpointCompass_RequireCompassItem": "必須攜帶指南針物品才能顯示羅盤",
+    "Sandbox_ViewpointCompass_RequireCompassItem_tooltip": "無論玩家的本機設定為何，玩家都必須攜帶原版指南針才能看到羅盤。",
+    "Sandbox_ViewpointCompass_AllowMapWaypoints": "允許在羅盤上顯示地圖航點",
+    "Sandbox_ViewpointCompass_AllowMapWaypoints_tooltip": "停用後，地圖標記無法加入羅盤或顯示於羅盤上。已儲存的選擇會保留。",
+    "Sandbox_ViewpointCompass_AllowFactionPlayers": "允許顯示陣營玩家標記",
+    "Sandbox_ViewpointCompass_AllowFactionPlayers_tooltip": "停用後，伺服器不會向用戶端分享陣營成員的位置。",
+    "Sandbox_ViewpointCompass_MaxFactionPlayerRange": "陣營玩家偵測最大範圍（公尺）",
+    "Sandbox_ViewpointCompass_MaxFactionPlayerRange_tooltip": "限制用戶端選擇的範圍。伺服器不會分享超出此距離的陣營成員位置。",
+    "Sandbox_ViewpointCompass_ShowFactionPlayerDistance": "顯示陣營玩家距離",
+    "Sandbox_ViewpointCompass_ShowFactionPlayerDistance_tooltip": "停用後，用戶端只會收到陣營成員的方向，不會收到座標或精確距離。"
+}

@@ -3,6 +3,10 @@
     "UI_ViewpointCompass_Options_DirectionOnlyTooltip": "Exibe apenas a direção atual (cardinal ou intercardinal); oculta a régua, os graus, as marcações do mapa e os membros da facção.",
     "UI_ViewpointCompass_Options_OpenWaypointManagerKey": "Abrir gerenciamento de destinos",
     "UI_ViewpointCompass_Options_OpenWaypointManagerKeyTooltip": "Abre ou fecha as marcações da bússola. Defina como Nenhuma para desativar o atalho.",
+    "UI_ViewpointCompass_Options_CompassScale": "Tamanho da bússola (%)",
+    "UI_ViewpointCompass_Options_CompassScaleTooltip": "Redimensiona toda a bússola, incluindo textos, divisões e marcações.",
+    "UI_ViewpointCompass_Options_RequireCompassItem": "Exigir uma bússola para exibir o compasso",
+    "UI_ViewpointCompass_Options_RequireCompassItemTooltip": "Você precisa carregar a bússola original. O servidor também pode impor essa exigência.",
     "UI_ViewpointCompass_Markers_Add": "Adicionar à bússola",
     "UI_ViewpointCompass_Markers_Manage": "Marcações da bússola",
     "UI_ViewpointCompass_Markers_Show": "Exibir marcações do mapa",
@@ -20,6 +24,8 @@
     "UI_ViewpointCompass_Markers_Below": "Abaixo da bússola",
     "UI_ViewpointCompass_Markers_Background": "Fundo das marcações dentro da bússola",
     "UI_ViewpointCompass_Options_ShowFactionPlayers": "Exibir membros próximos da facção na bússola",
-    "UI_ViewpointCompass_Options_ShowFactionPlayersTooltip": "Requer Viewpoint Compass no servidor. Exibe membros online da sua facção a até 250 m.",
+    "UI_ViewpointCompass_Options_ShowFactionPlayersTooltip": "Requer Viewpoint Compass no servidor. O servidor pode desativar esse recurso ou limitar seu alcance.",
+    "UI_ViewpointCompass_Options_FactionPlayerRange": "Alcance de detecção de aliados (metros)",
+    "UI_ViewpointCompass_Options_FactionPlayerRangeTooltip": "Detecta membros da mesma facção entre 25 e 1.000 metros, respeitando o limite do servidor. Padrão: 250 metros.",
     "UI_ViewpointCompass_Options_FactionPlayerPosition": "Posição dos aliados na bússola"
 }

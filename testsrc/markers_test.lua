@@ -126,6 +126,15 @@ for _, color in ipairs(palette) do
     check(original[2] == 20 and original[3] == 30 and original[7] == color[1]
         and original[8] == color[2] and original[9] == color[3], "original marker color is preserved")
 end
+local scaledDraws = {}
+local scaledUI = { drawTextureScaled = function(_, texture, x, y, width, height, alpha, r, g, b)
+    scaledDraws[#scaledDraws + 1] = { texture, x, y, width, height, alpha, r, g, b }
+end }
+Markers.drawIcon(scaledUI, { signature = { text = false, content = "marker", a = 1,
+    r = 0, g = 0, b = 0 } }, 20, 30, 32, 2)
+check(scaledDraws[1][2] == 22 and scaledDraws[1][3] == 32
+    and scaledDraws[1][4] == 32 and scaledDraws[2][2] == 18,
+    "map marker icon scales with the compass")
 print("markers_test: PASS")
 local above = Markers.layout(1, true, 1)
 local inside = Markers.layout(2, true, 1)
@@ -137,4 +146,8 @@ assert(Markers.layout(1, false, 3).height == 42, "hidden markers reserve no spac
 assert(Markers.layout(1, true, 0).rulerY == 0, "empty selection keeps ruler at top")
 assert(Markers.layout(99, true, 1).inside, "invalid position defaults inside")
 assert(Markers.layout(nil, true, 1).inside, "missing position defaults inside")
+local halfScale = Markers.layout(1, true, 1, 0.5)
+local doubleScale = Markers.layout(3, true, 1, 2)
+assert(halfScale.rulerY == 21 and halfScale.height == 42, "marker layout scales down")
+assert(doubleScale.markerY == 84 and doubleScale.height == 168, "marker layout scales up")
 print("marker_layout_test: PASS")

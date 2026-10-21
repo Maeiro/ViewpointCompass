@@ -4,6 +4,7 @@ require "ISUI/ISButton"
 require "ISUI/ISTextBox"
 require "ISUI/ISModalDialog"
 local Markers = ViewpointCompassMarkers or require "ViewpointCompass/Markers"
+local ServerPolicy = ViewpointCompassServerPolicy or require "ViewpointCompass/ServerPolicy"
 local Window = ISCollapsableWindow:derive("ViewpointCompassMarkerWindow")
 ViewpointCompassMarkerWindow = Window
 Window.instances = {}
@@ -96,6 +97,7 @@ function Window.drawItem(list, y, item, alternate)
 end
 
 function Window:update()
+    if not ServerPolicy.getBoolean("AllowMapWaypoints") then self:close(); return end
     ISCollapsableWindow.update(self)
     if self.symbolsUI and not self.symbolsUI.mapUI:isReallyVisible() then self:close(); return end
     local state = Markers.refresh(self.player)

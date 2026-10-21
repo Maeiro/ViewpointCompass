@@ -35,11 +35,12 @@ function Markers.text(key)
     return (getTextOrNull and getTextOrNull("UI_ViewpointCompass_Markers_" .. key)) or fallback[key] or key
 end
 
-function Markers.layout(position, enabled, count)
-    if not enabled or count == 0 then return { rulerY = 0, markerY = 0, height = 42 } end
-    if position == 1 then return { rulerY = 42, markerY = 0, height = 84 } end
-    if position == 3 then return { rulerY = 0, markerY = 42, height = 84 } end
-    return { rulerY = 0, markerY = 0, height = 42, inside = true }
+function Markers.layout(position, enabled, count, scale)
+    local height = 42 * (scale or 1)
+    if not enabled or count == 0 then return { rulerY = 0, markerY = 0, height = height } end
+    if position == 1 then return { rulerY = height, markerY = 0, height = height * 2 } end
+    if position == 3 then return { rulerY = 0, markerY = height, height = height * 2 } end
+    return { rulerY = 0, markerY = 0, height = height, inside = true }
 end
 
 local function snapshot(symbol)
@@ -186,7 +187,7 @@ function Markers.distance(player, marker)
     return math.sqrt(dx * dx + dy * dy)
 end
 
-function Markers.project(player, markers, heading, width, pixelsPerDegree)
+function Markers.project(player, markers, heading, width, pixelsPerDegree, scale)
     local points = {}
     for _, marker in ipairs(markers) do
         local s = marker.signature
@@ -203,7 +204,7 @@ function Markers.project(player, markers, heading, width, pixelsPerDegree)
     local groups = {}
     for _, point in ipairs(points) do
         local group = groups[#groups]
-        if group and point.x - group.right < 24 then
+        if group and point.x - group.right < 24 * (scale or 1) then
             group.right = point.x
             group.count = group.count + 1
             if point.distance < group.distance then
@@ -217,27 +218,33 @@ function Markers.project(player, markers, heading, width, pixelsPerDegree)
     return groups
 end
 
-function Markers.drawIcon(ui, marker, x, y, size)
+function Markers.drawIcon(ui, marker, x, y, size, scale)
+    scale = scale or 1
     local s = marker.signature
     local definition = not s.text and MapSymbolDefinitions.getInstance():getSymbolById(s.content)
     local texture = definition and getTexture(definition:getTexturePath())
     local outline, shadow = markerOutlineColors(s)
     local alpha = type(s.a) == "number" and math.max(0, math.min(1, s.a)) or 1
     if texture then
-        ui:drawTextureScaled(texture, x + 1, y + 1, size, size, alpha * 0.7, shadow, shadow, shadow)
+        ui:drawTextureScaled(texture, x + scale, y + scale, size, size, alpha * 0.7, shadow, shadow, shadow)
         for _, offset in ipairs(iconOutlineOffsets) do
-            ui:drawTextureScaled(texture, x + offset[1], y + offset[2], size, size,
+            ui:drawTextureScaled(texture, x + offset[1] * scale, y + offset[2] * scale, size, size,
                 alpha, outline, outline, outline)
         end
         ui:drawTextureScaled(texture, x, y, size, size, alpha, s.r, s.g, s.b)
     else
-        ui:drawRectBorder(x + 2, y + 1, size - 4, size - 2, alpha, outline, outline, outline)
-        ui:drawRectBorder(x + 4, y + 3, size - 4, size - 2, alpha * 0.7, shadow, shadow, shadow)
-        ui:drawRectBorder(x + 3, y + 2, size - 6, size - 4, alpha, s.r, s.g, s.b)
-        ui:drawRect(x + 7, y + 7, size - 12, 1, alpha * 0.7, shadow, shadow, shadow)
-        ui:drawRect(x + 7, y + 11, size - 12, 1, alpha * 0.7, shadow, shadow, shadow)
-        ui:drawRect(x + 6, y + 6, size - 12, 1, alpha, s.r, s.g, s.b)
-        ui:drawRect(x + 6, y + 10, size - 12, 1, alpha, s.r, s.g, s.b)
+        ui:drawRectBorder(x + 2 * scale, y + scale, size - 4 * scale, size - 2 * scale,
+            alpha, outline, outline, outline)
+        ui:drawRectBorder(x + 4 * scale, y + 3 * scale, size - 4 * scale, size - 2 * scale,
+            alpha * 0.7, shadow, shadow, shadow)
+        ui:drawRectBorder(x + 3 * scale, y + 2 * scale, size - 6 * scale, size - 4 * scale,
+            alpha, s.r, s.g, s.b)
+        ui:drawRect(x + 7 * scale, y + 7 * scale, size - 12 * scale, scale,
+            alpha * 0.7, shadow, shadow, shadow)
+        ui:drawRect(x + 7 * scale, y + 11 * scale, size - 12 * scale, scale,
+            alpha * 0.7, shadow, shadow, shadow)
+        ui:drawRect(x + 6 * scale, y + 6 * scale, size - 12 * scale, scale, alpha, s.r, s.g, s.b)
+        ui:drawRect(x + 6 * scale, y + 10 * scale, size - 12 * scale, scale, alpha, s.r, s.g, s.b)
     end
 end
 

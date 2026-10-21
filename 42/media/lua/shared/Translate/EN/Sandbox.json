@@ -1,0 +1,13 @@
+{
+    "Sandbox_ViewpointCompass_Page": "Viewpoint Compass",
+    "Sandbox_ViewpointCompass_RequireCompassItem": "Require a Compass item to show the compass",
+    "Sandbox_ViewpointCompass_RequireCompassItem_tooltip": "Players must carry the vanilla Compass item to see the compass, regardless of their local setting.",
+    "Sandbox_ViewpointCompass_AllowMapWaypoints": "Allow map waypoints on the compass",
+    "Sandbox_ViewpointCompass_AllowMapWaypoints_tooltip": "When disabled, map annotations cannot be added to or shown on the compass. Saved selections are kept.",
+    "Sandbox_ViewpointCompass_AllowFactionPlayers": "Allow faction player markers",
+    "Sandbox_ViewpointCompass_AllowFactionPlayers_tooltip": "When disabled, the server does not share faction member locations with clients.",
+    "Sandbox_ViewpointCompass_MaxFactionPlayerRange": "Maximum faction player detection range (meters)",
+    "Sandbox_ViewpointCompass_MaxFactionPlayerRange_tooltip": "Caps the range selected by each client. The server never shares faction member locations beyond this distance.",
+    "Sandbox_ViewpointCompass_ShowFactionPlayerDistance": "Show faction player distance",
+    "Sandbox_ViewpointCompass_ShowFactionPlayerDistance_tooltip": "When disabled, clients receive only the direction of faction members, not their coordinates or exact distance."
+}

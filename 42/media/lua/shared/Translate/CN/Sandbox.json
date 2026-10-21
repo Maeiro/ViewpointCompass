@@ -1,0 +1,13 @@
+{
+    "Sandbox_ViewpointCompass_Page": "Viewpoint 指南针",
+    "Sandbox_ViewpointCompass_RequireCompassItem": "需要携带指南针物品才能显示罗盘",
+    "Sandbox_ViewpointCompass_RequireCompassItem_tooltip": "无论玩家的本地设置如何，玩家都必须携带原版指南针才能看到罗盘。",
+    "Sandbox_ViewpointCompass_AllowMapWaypoints": "允许在罗盘上显示地图路径点",
+    "Sandbox_ViewpointCompass_AllowMapWaypoints_tooltip": "禁用后，地图标记无法添加到罗盘或显示在罗盘上。已保存的选择会保留。",
+    "Sandbox_ViewpointCompass_AllowFactionPlayers": "允许显示阵营玩家标记",
+    "Sandbox_ViewpointCompass_AllowFactionPlayers_tooltip": "禁用后，服务器不会向客户端分享阵营成员的位置。",
+    "Sandbox_ViewpointCompass_MaxFactionPlayerRange": "阵营玩家检测最大范围（米）",
+    "Sandbox_ViewpointCompass_MaxFactionPlayerRange_tooltip": "限制客户端选择的范围。服务器不会分享超出此距离的阵营成员位置。",
+    "Sandbox_ViewpointCompass_ShowFactionPlayerDistance": "显示阵营玩家距离",
+    "Sandbox_ViewpointCompass_ShowFactionPlayerDistance_tooltip": "禁用后，客户端只会收到阵营成员的方向，不会收到坐标或精确距离。"
+}

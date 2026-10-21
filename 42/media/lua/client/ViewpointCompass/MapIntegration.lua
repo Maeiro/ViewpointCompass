@@ -1,9 +1,14 @@
 require "ISUI/Maps/ISWorldMapSymbols"
 local Markers = ViewpointCompassMarkers or require "ViewpointCompass/Markers"
 local Window = ViewpointCompassMarkerWindow or require "ViewpointCompass/MarkerWindow"
+local ServerPolicy = ViewpointCompassServerPolicy or require "ViewpointCompass/ServerPolicy"
 local Tool = ISWorldMapSymbolTool:derive("ViewpointCompassSelectMarkerTool")
 
 function Tool:onMouseUp(x, y)
+    if not ServerPolicy.getBoolean("AllowMapWaypoints") then
+        self.symbolsUI:setCurrentTool(nil)
+        return true
+    end
     local clicked = self.dragging and not self.dragMoved
     ISWorldMapSymbolTool.onMouseUp(self, x, y)
     if not clicked then return false end
@@ -25,6 +30,10 @@ function Tool:isKeyConsumed(key)
 end
 
 function Tool:render()
+    if not ServerPolicy.getBoolean("AllowMapWaypoints") then
+        self.symbolsUI:setCurrentTool(nil)
+        return
+    end
     self.symbolsUI:hitTestAnnotations(self:getMouseX(), self:getMouseY(), "compass", function(symbol)
         return symbol ~= nil
     end)
@@ -63,9 +72,13 @@ if not ISWorldMapSymbols.viewpointCompassIntegrated then
     local originalPrerender = ISWorldMapSymbols.prerender
     function ISWorldMapSymbols:prerender()
         originalPrerender(self)
+        local allowed = ServerPolicy.getBoolean("AllowMapWaypoints")
         if self.compassAddButton then
+            self.compassAddButton:setEnable(allowed)
             self.compassAddButton.borderColor.a = self.currentTool == self.compassTool and 1 or 0
         end
+        if self.compassManageButton then self.compassManageButton:setEnable(allowed) end
+        if not allowed and self.currentTool == self.compassTool then self:setCurrentTool(nil) end
     end
 
     for _, method in ipairs({ "onMouseUpMap", "onKeyRelease", "onButtonClick" }) do

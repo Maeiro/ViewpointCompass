@@ -1,0 +1,36 @@
+VERSION = 1,
+
+option ViewpointCompass.RequireCompassItem
+{
+    type = boolean, default = false,
+    page = ViewpointCompass_Page,
+    translation = ViewpointCompass_RequireCompassItem,
+}
+
+option ViewpointCompass.AllowMapWaypoints
+{
+    type = boolean, default = true,
+    page = ViewpointCompass_Page,
+    translation = ViewpointCompass_AllowMapWaypoints,
+}
+
+option ViewpointCompass.AllowFactionPlayers
+{
+    type = boolean, default = true,
+    page = ViewpointCompass_Page,
+    translation = ViewpointCompass_AllowFactionPlayers,
+}
+
+option ViewpointCompass.MaxFactionPlayerRange
+{
+    type = integer, min = 25, max = 1000, default = 1000,
+    page = ViewpointCompass_Page,
+    translation = ViewpointCompass_MaxFactionPlayerRange,
+}
+
+option ViewpointCompass.ShowFactionPlayerDistance
+{
+    type = boolean, default = true,
+    page = ViewpointCompass_Page,
+    translation = ViewpointCompass_ShowFactionPlayerDistance,
+}

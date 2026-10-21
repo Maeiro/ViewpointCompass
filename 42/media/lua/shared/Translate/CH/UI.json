@@ -6,8 +6,10 @@
     "UI_ViewpointCompass_Options_OpenWaypointManagerKey": "開啟航點管理",
     "UI_ViewpointCompass_Options_OpenWaypointManagerKeyTooltip": "開啟或關閉羅盤標記視窗。設為「無」可停用此快捷鍵。",
     "UI_ViewpointCompass_Options_RequireCompassItem": "必須攜帶指南針物品才能顯示羅盤",
-    "UI_ViewpointCompass_Options_RequireCompassItemTooltip": "啟用後，必須在物品欄或隨身包中攜帶原版指南針。",
+    "UI_ViewpointCompass_Options_RequireCompassItemTooltip": "啟用後，必須攜帶原版指南針。伺服器也可以強制要求攜帶。",
     "UI_ViewpointCompass_Options_CompassWidth": "羅盤寬度（像素）",
+    "UI_ViewpointCompass_Options_CompassScale": "羅盤大小（%）",
+    "UI_ViewpointCompass_Options_CompassScaleTooltip": "縮放整個羅盤，包括文字、刻度與標記。",
     "UI_ViewpointCompass_Options_CompassLabelColor": "羅盤方向標籤顏色",
     "UI_ViewpointCompass_Options_CompassLanguage": "羅盤方向語言",
     "UI_ViewpointCompass_Language_English": "英語",
@@ -43,6 +45,8 @@
     "UI_ViewpointCompass_Markers_Below": "羅盤下方",
     "UI_ViewpointCompass_Markers_Background": "羅盤內標記背景",
     "UI_ViewpointCompass_Options_ShowFactionPlayers": "在羅盤上顯示附近的同陣營玩家",
-    "UI_ViewpointCompass_Options_ShowFactionPlayersTooltip": "需要伺服器安裝 Viewpoint Compass。顯示 250 公尺內線上的同陣營玩家。",
+    "UI_ViewpointCompass_Options_ShowFactionPlayersTooltip": "需要伺服器安裝 Viewpoint Compass。伺服器可以停用此功能或限制其範圍。",
+    "UI_ViewpointCompass_Options_FactionPlayerRange": "陣營玩家偵測範圍（公尺）",
+    "UI_ViewpointCompass_Options_FactionPlayerRangeTooltip": "偵測 25 至 1000 公尺內的同陣營玩家，但不能超過伺服器設定的上限。預設：250 公尺。",
     "UI_ViewpointCompass_Options_FactionPlayerPosition": "同陣營玩家標記位置"
 }

@@ -6,8 +6,10 @@
     "UI_ViewpointCompass_Options_OpenWaypointManagerKey": "打开路径点管理",
     "UI_ViewpointCompass_Options_OpenWaypointManagerKeyTooltip": "打开或关闭罗盘标记窗口。设为“无”可禁用此快捷键。",
     "UI_ViewpointCompass_Options_RequireCompassItem": "需要携带指南针物品以显示罗盘",
-    "UI_ViewpointCompass_Options_RequireCompassItemTooltip": "启用后，需在物品栏或随身包中携带原版指南针。",
+    "UI_ViewpointCompass_Options_RequireCompassItemTooltip": "启用后，必须携带原版指南针。服务器也可以强制要求携带。",
     "UI_ViewpointCompass_Options_CompassWidth": "罗盘宽度（像素）",
+    "UI_ViewpointCompass_Options_CompassScale": "罗盘大小（%）",
+    "UI_ViewpointCompass_Options_CompassScaleTooltip": "缩放整个罗盘，包括文字、刻度和标记。",
     "UI_ViewpointCompass_Options_CompassLabelColor": "罗盘方向标签颜色",
     "UI_ViewpointCompass_Options_CompassLanguage": "罗盘方向语言",
     "UI_ViewpointCompass_Language_English": "英语",
@@ -43,6 +45,8 @@
     "UI_ViewpointCompass_Markers_Below": "罗盘下方",
     "UI_ViewpointCompass_Markers_Background": "罗盘内标记的背景",
     "UI_ViewpointCompass_Options_ShowFactionPlayers": "在罗盘上显示附近的同阵营玩家",
-    "UI_ViewpointCompass_Options_ShowFactionPlayersTooltip": "需要服务器安装 Viewpoint Compass。显示 250 米内在线的同阵营玩家。",
+    "UI_ViewpointCompass_Options_ShowFactionPlayersTooltip": "需要服务器安装 Viewpoint Compass。服务器可以禁用此功能或限制其范围。",
+    "UI_ViewpointCompass_Options_FactionPlayerRange": "阵营玩家检测范围（米）",
+    "UI_ViewpointCompass_Options_FactionPlayerRangeTooltip": "检测 25 至 1000 米内的同阵营玩家，但不能超过服务器设定的上限。默认：250 米。",
     "UI_ViewpointCompass_Options_FactionPlayerPosition": "阵营玩家标记位置"
 }
