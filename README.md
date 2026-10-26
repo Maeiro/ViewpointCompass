@@ -32,6 +32,7 @@ A customizable, camera-aligned compass ribbon for Project Zomboid, showing your 
 - Show map markers is enabled by default; disabling it preserves selections. Paper maps are not supported.
 - Place map markers above, inside (default), or below the compass. Inside and below keep the ruler near the top edge; no marker band is reserved when the selection is empty. Inside markers have an optional background, disabled by default. Existing position preferences are preserved.
 - Optionally show nearby online players from your own faction on the compass, with a green player icon and distance. Choose above, inside (default), or below the compass. Set the detection range from 25 to 1,000 meters (default 250); locations interpolate smoothly between server updates. The server can disable these markers, cap their range, or share direction without exact distance or coordinates. This feature is enabled by default and requires Viewpoint Compass on the server.
+- Optionally show Project A-Life NPCs from Viewpoint Threat Detector on the compass, using the standard A-Life icon with stance-colored outlines: Allied blue, Friendly green, Neutral white, Careful yellow, and Hostile red. Each marker shows distance in meters (one tile = one meter); armed NPCs also show a firearm icon underneath. Off-screen NPCs use a colored left/right edge arrow. New Hostile and Careful markers blink briefly, and Hostile markers keep blinking within a configurable close range. The feature is enabled by default and requires both mods to be installed locally.
 - Server owners can use the Viewpoint Compass Sandbox Options to require a carried Compass item, disable compass map waypoints, disable faction-player markers, cap the maximum ally-detection range, or hide exact faction-player distances. Defaults preserve the existing behavior.
 
 ## Testing map markers
@@ -46,6 +47,7 @@ A customizable, camera-aligned compass ribbon for Project Zomboid, showing your 
 ## Requirements
 
 - Project Viewpoint.
+- Project A-Life, for A-Life markers through Viewpoint Threat Detector.
 - ZombieBuddy 2.3.0 or newer.
 - Project Zomboid Build 42.21.
 - In multiplayer, install the mod on each client that wants the compass. The compass and map markers work client-side without the mod on the server; nearby faction-player markers require Viewpoint Compass to be enabled on the server.

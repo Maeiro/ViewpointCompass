@@ -20,8 +20,30 @@ local MAX_SCALE = 2
 local DEFAULT_FACTION_PLAYER_RANGE = 250
 local MIN_FACTION_PLAYER_RANGE = 25
 local MAX_FACTION_PLAYER_RANGE = 1000
+local DEFAULT_ALIFE_MARKER_RANGE = 40
+local MIN_ALIFE_MARKER_RANGE = 5
+local MAX_ALIFE_MARKER_RANGE = 100
+local ALIFE_NEW_MARKER_BLINK_MS = 2000
+local DEFAULT_HOSTILE_CLOSE_BLINK_DISTANCE = 5
 local DEFAULT_LABEL_COLOR = { r = 222 / 255, g = 178 / 255, b = 110 / 255, a = 1 }
 local FactionPlayers = ViewpointCompassFactionPlayers or require "ViewpointCompass/FactionPlayers"
+local ALIFE_STANCE_COLORS = {
+    allied = { 0.25, 0.68, 1 },
+    friendly = { 0.25, 0.9, 0.35 },
+    neutral = { 0.88, 0.88, 0.88 },
+    careful = { 1, 0.82, 0.12 },
+    hostile = { 1, 0.2, 0.16 },
+}
+local ALIFE_STANCE_ORDER = { "hostile", "careful", "neutral", "friendly", "allied" }
+local alifeMarkerStates = {}
+local alifeIconTexture
+local firearmIconTexture
+local alifeBridge = rawget(_G, "ViewpointCompassALifeBridge")
+if type(alifeBridge) ~= "table" then
+    alifeBridge = { markers = {} }
+    rawset(_G, "ViewpointCompassALifeBridge", alifeBridge)
+end
+
 local function uiText(key, fallback)
     local translated = getTextOrNull and getTextOrNull("UI_ViewpointCompass_" .. key)
     if type(translated) == "string" and translated ~= "" then return translated end
@@ -139,6 +161,99 @@ local function addFactionPlayerPositionOption(target)
     end
 end
 
+local function addALifeMarkerOptions(target)
+    if not target:getOption("ShowALifeMarkers") then
+        target:addTickBox(
+            "ShowALifeMarkers",
+            uiText("Options_ShowALifeMarkers", "Show A-Life NPCs on the compass"),
+            true,
+            uiText("Options_ShowALifeMarkersTooltip",
+                "Requires Viewpoint Threat Detector. Hostile, Careful, Neutral, Friendly, and Allied NPCs use different outline colors.")
+        )
+    end
+    if not target:getOption("ALifeMarkerRange") then
+        target:addSlider(
+            "ALifeMarkerRange",
+            uiText("Options_ALifeMarkerRange", "A-Life compass detection range (meters)"),
+            MIN_ALIFE_MARKER_RANGE,
+            MAX_ALIFE_MARKER_RANGE,
+            5,
+            DEFAULT_ALIFE_MARKER_RANGE,
+            uiText("Options_ALifeMarkerRangeTooltip",
+                "Maximum distance for A-Life compass markers. One tile is shown as one meter.")
+        )
+    end
+    if not target:getOption("BlinkNewALifeThreats") then
+        target:addTickBox(
+            "BlinkNewALifeThreats",
+            uiText("Options_BlinkNewALifeThreats", "Blink new Hostile and Careful NPCs"),
+            true,
+            uiText("Options_BlinkNewALifeThreatsTooltip",
+                "Hostile and Careful markers blink briefly when they first appear on the compass.")
+        )
+    end
+    if not target:getOption("HostileCloseBlinkDistance") then
+        target:addSlider(
+            "HostileCloseBlinkDistance",
+            uiText("Options_HostileCloseBlinkDistance", "Hostile close-range blink distance (meters)"),
+            0,
+            30,
+            1,
+            DEFAULT_HOSTILE_CLOSE_BLINK_DISTANCE,
+            uiText("Options_HostileCloseBlinkDistanceTooltip",
+                "Hostile markers keep blinking within this distance. Set to 0 to disable close-range blinking.")
+        )
+    end
+end
+
+local function organizeCompassOptions(target)
+    local sections = {
+        {
+            title = "Options_Category_General",
+            fallback = "General",
+            options = { "ShowCompass", "RequireCompassItem", "OpenWaypointManagerKey" },
+        },
+        {
+            title = "Options_Category_Display",
+            fallback = "Compass Display",
+            options = { "DirectionOnly", "CompassWidth", "CompassScale", "CompassLabelColor", "CompassLanguage" },
+        },
+        {
+            title = "Options_Category_MapMarkers",
+            fallback = "Map Markers",
+            options = { "ShowMapMarkers", "MapMarkerBackground", "MapMarkerPosition" },
+        },
+        {
+            title = "Options_Category_FactionPlayers",
+            fallback = "Faction Players",
+            options = { "ShowFactionPlayers", "FactionPlayerRange", "FactionPlayerPosition" },
+        },
+        {
+            title = "Options_ALifeMarkersTitle",
+            fallback = "A-Life Compass Markers",
+            options = { "ShowALifeMarkers", "ALifeMarkerRange", "BlinkNewALifeThreats", "HostileCloseBlinkDistance" },
+        },
+    }
+    local ordered = {}
+    local included = {}
+    for _, section in ipairs(sections) do
+        ordered[#ordered + 1] = { type = "title", name = uiText(section.title, section.fallback) }
+        for _, id in ipairs(section.options) do
+            local option = target:getOption(id)
+            if option then
+                ordered[#ordered + 1] = option
+                included[id] = true
+            end
+        end
+    end
+    for _, option in ipairs(target.data) do
+        if option.type ~= "title" and (not option.id or not included[option.id]) then
+            ordered[#ordered + 1] = option
+        end
+    end
+    target.data = ordered
+end
+
 local function registerOptions()
     if not PZAPI or not PZAPI.ModOptions then return end
     options = PZAPI.ModOptions:getOptions(MOD_ID)
@@ -149,6 +264,8 @@ local function registerOptions()
         if not options:getOption("ShowFactionPlayers") then addFactionPlayersOption(options) end
         if not options:getOption("FactionPlayerRange") then addFactionPlayerRangeOption(options) end
         if not options:getOption("FactionPlayerPosition") then addFactionPlayerPositionOption(options) end
+        addALifeMarkerOptions(options)
+        organizeCompassOptions(options)
         return
     end
 
@@ -159,6 +276,7 @@ local function registerOptions()
     addFactionPlayersOption(options)
     addFactionPlayerRangeOption(options)
     addFactionPlayerPositionOption(options)
+    addALifeMarkerOptions(options)
     options:addTickBox("ShowMapMarkers", Markers.text("Show"), true)
     options:addTickBox("MapMarkerBackground", Markers.text("Background"), false)
     local markerPosition = options:addComboBox("MapMarkerPosition", Markers.text("Position"))
@@ -188,6 +306,7 @@ local function registerOptions()
     for index, language in ipairs(LANGUAGES) do
         languageOption:addItem(uiText(language.key, language.fallback), index == 1)
     end
+    organizeCompassOptions(options)
 end
 
 registerOptions()
@@ -237,9 +356,169 @@ local function drawTextCentreScaled(ui, text, x, y, scale, r, g, b, a)
     drawTextScaled(ui, text, x - textWidth / 2, y, scale, r, g, b, a)
 end
 
-local function drawMarkerDistance(ui, label, x, y, scale)
-    drawTextCentreScaled(ui, label, x + scale, y + scale, scale, 0.02, 0.02, 0.02, 0.78)
-    drawTextCentreScaled(ui, label, x, y, scale, 0.96, 0.94, 0.94, 1)
+local function drawMarkerDistance(ui, label, x, y, scale, alpha)
+    alpha = alpha or 1
+    drawTextCentreScaled(ui, label, x + scale, y + scale, scale, 0.02, 0.02, 0.02, 0.78 * alpha)
+    drawTextCentreScaled(ui, label, x, y, scale, 0.96, 0.94, 0.94, alpha)
+end
+
+local function alifeIcon()
+    if alifeIconTexture then return alifeIconTexture end
+    local ok, texture = pcall(getTexture, "media/ui/ThreatAlert/alife.png")
+    if ok and texture then
+        alifeIconTexture = texture
+        return texture
+    end
+    return nil
+end
+
+local function firearmIcon()
+    if firearmIconTexture then return firearmIconTexture end
+    local ok, texture = pcall(getTexture, "media/textures/Item_HandGun3")
+    if ok and texture then
+        firearmIconTexture = texture
+        return texture
+    end
+    return nil
+end
+
+local function alifeBlinking(marker, now, blinkNewThreats, hostileCloseDistance)
+    local id = tostring(marker.id)
+    local stance = marker.stance
+    local state = alifeMarkerStates[id]
+    if not state or state.stance ~= stance then
+        state = { stance = stance }
+        if blinkNewThreats and (stance == "hostile" or stance == "careful") then
+            state.blinkUntil = now + ALIFE_NEW_MARKER_BLINK_MS
+        end
+        alifeMarkerStates[id] = state
+    end
+    local closeHostile = stance == "hostile" and hostileCloseDistance > 0
+        and marker.distance <= hostileCloseDistance
+    return closeHostile or (state.blinkUntil and now < state.blinkUntil) or false
+end
+
+local function projectALifeMarkers(player, markers, heading, width, pixelsPerDegree, scale,
+        maxDistance, blinkNewThreats, hostileCloseDistance)
+    if not player or type(heading) ~= "number" or type(width) ~= "number"
+            or type(pixelsPerDegree) ~= "number" then
+        alifeMarkerStates = {}
+        return {}, { left = {}, right = {} }
+    end
+
+    local playerX, playerY
+    local ok = pcall(function() playerX, playerY = player:getX(), player:getY() end)
+    if not ok or type(playerX) ~= "number" or type(playerY) ~= "number" then
+        alifeMarkerStates = {}
+        return {}, { left = {}, right = {} }
+    end
+
+    local now = type(getTimestampMs) == "function" and getTimestampMs() or 0
+    local halfRange = width / (2 * pixelsPerDegree)
+    local maxDistanceSquared = maxDistance * maxDistance
+    local active = {}
+    local visible = {}
+    local edgeMarkers = { left = {}, right = {} }
+
+    for _, marker in ipairs(markers or {}) do
+        local color = type(marker) == "table" and ALIFE_STANCE_COLORS[marker.stance]
+        if color and marker.id ~= nil and type(marker.x) == "number" and type(marker.y) == "number" then
+            local dx, dy = marker.x - playerX, marker.y - playerY
+            local distance = math.sqrt(dx * dx + dy * dy)
+            if distance <= maxDistance and distance * distance <= maxDistanceSquared then
+                local id = tostring(marker.id)
+                active[id] = true
+                local bearing = (math.deg(math.atan2(dy, dx)) + 90) % 360
+                local delta = shortestAngle(bearing - heading)
+                local blinking = alifeBlinking({ id = id, stance = marker.stance, distance = distance },
+                    now, blinkNewThreats, hostileCloseDistance)
+                if math.abs(delta) <= halfRange then
+                    local x = width / 2 + delta * pixelsPerDegree
+                    local grouped
+                    for _, point in ipairs(visible) do
+                        if point.stance == marker.stance and math.abs(point.x - x) < 20 * scale then
+                            grouped = point
+                            break
+                        end
+                    end
+                    if grouped then
+                        grouped.count = grouped.count + 1
+                        grouped.armedCount = grouped.armedCount + (marker.armed and 1 or 0)
+                        grouped.blinking = grouped.blinking or blinking
+                        if distance < grouped.distance then
+                            grouped.x, grouped.distance = x, distance
+                            grouped.marker = marker
+                        end
+                    else
+                        visible[#visible + 1] = {
+                            x = x,
+                            distance = distance,
+                            count = 1,
+                            armedCount = marker.armed and 1 or 0,
+                            stance = marker.stance,
+                            marker = marker,
+                            blinking = blinking,
+                        }
+                    end
+                else
+                    local side = delta < 0 and "left" or "right"
+                    local group = edgeMarkers[side][marker.stance]
+                    if not group then
+                        group = { stance = marker.stance, marker = marker, distance = distance,
+                            count = 0, armedCount = 0, blinking = false }
+                        edgeMarkers[side][marker.stance] = group
+                    end
+                    group.count = group.count + 1
+                    group.armedCount = group.armedCount + (marker.armed and 1 or 0)
+                    group.blinking = group.blinking or blinking
+                    if distance < group.distance then
+                        group.marker, group.distance = marker, distance
+                    end
+                end
+            end
+        end
+    end
+
+    for id in pairs(alifeMarkerStates) do
+        if not active[id] then alifeMarkerStates[id] = nil end
+    end
+    table.sort(visible, function(a, b) return a.x < b.x end)
+    for _, side in ipairs({ "left", "right" }) do
+        local ordered = {}
+        for _, stance in ipairs(ALIFE_STANCE_ORDER) do
+            local group = edgeMarkers[side][stance]
+            if group then ordered[#ordered + 1] = group end
+        end
+        edgeMarkers[side] = ordered
+    end
+    return visible, edgeMarkers
+end
+
+local function alifeMarkerAlpha(blinking, now)
+    if not blinking then return 1 end
+    return 0.25 + 0.75 * (0.5 + 0.5 * math.sin(now / 1000 * math.pi * 4))
+end
+
+local function drawALifeMarkerIcon(ui, point, x, y, scale, alpha)
+    local color = ALIFE_STANCE_COLORS[point.stance]
+    local size = 16 * scale
+    local outline = 2 * scale
+    ui:drawRectBorder(x - outline, y - outline, size + outline * 2, size + outline * 2,
+        alpha, color[1], color[2], color[3])
+    local texture = alifeIcon()
+    if texture then
+        ui:drawTextureScaled(texture, x, y, size, size, 1, 1, 1, alpha)
+    else
+        drawTextCentreScaled(ui, "A", x + size / 2, y, scale, color[1], color[2], color[3], alpha)
+    end
+end
+
+local function drawFirearmMarkerIcon(ui, x, y, scale, alpha)
+    local texture = firearmIcon()
+    if texture then
+        local size = 12 * scale
+        ui:drawTextureScaled(texture, x - size / 2, y, size, size, 1, 1, 1, alpha)
+    end
 end
 
 local function compassWidth()
@@ -258,6 +537,18 @@ local function factionPlayerRange()
     local range = optionValue("FactionPlayerRange", DEFAULT_FACTION_PLAYER_RANGE)
     if type(range) ~= "number" then return DEFAULT_FACTION_PLAYER_RANGE end
     return math.max(MIN_FACTION_PLAYER_RANGE, math.min(MAX_FACTION_PLAYER_RANGE, range))
+end
+
+local function alifeMarkerRange()
+    local range = optionValue("ALifeMarkerRange", DEFAULT_ALIFE_MARKER_RANGE)
+    if type(range) ~= "number" then return DEFAULT_ALIFE_MARKER_RANGE end
+    return math.max(MIN_ALIFE_MARKER_RANGE, math.min(MAX_ALIFE_MARKER_RANGE, range))
+end
+
+local function hostileCloseBlinkDistance()
+    local distance = optionValue("HostileCloseBlinkDistance", DEFAULT_HOSTILE_CLOSE_BLINK_DISTANCE)
+    if type(distance) ~= "number" then return DEFAULT_HOSTILE_CLOSE_BLINK_DISTANCE end
+    return math.max(0, math.min(30, distance))
 end
 
 local function markerPosition(name)
@@ -473,6 +764,71 @@ function ViewpointCompassUI:render()
             if label ~= "" then drawMarkerDistance(self, label, x, markerY, scale) end
         end
     end
+
+    local markerY = markerOffset + 2 * scale
+    local now = type(getTimestampMs) == "function" and getTimestampMs() or 0
+    local occupied = {}
+    for _, point in ipairs(points) do occupied[#occupied + 1] = { x = point.x, halfWidth = 14 * scale } end
+    for _, point in ipairs(self.factionPlayerPoints or {}) do
+        occupied[#occupied + 1] = { x = point.x, halfWidth = 14 * scale }
+    end
+    for _, point in ipairs(self.alifeMarkerPoints or {}) do
+        local label = string.format("%dm", math.floor(point.distance + 0.5))
+        if point.count > 1 then label = label .. " +" .. tostring(point.count - 1) end
+        local labelWidth = getTextManager():MeasureStringX(UIFont.Small, label) * scale
+        local halfWidth = math.max(12 * scale, labelWidth / 2 + 4 * scale)
+        local x = math.max(halfWidth, math.min(width - halfWidth, point.x))
+        local attempts = 0
+        while attempts < 8 do
+            local conflict
+            for _, other in ipairs(occupied) do
+                if math.abs(x - other.x) < halfWidth + other.halfWidth + 2 * scale then
+                    conflict = true
+                    break
+                end
+            end
+            if not conflict then break end
+            attempts = attempts + 1
+            local direction = x < width / 2 and -1 or 1
+            local shifted = x + direction * (halfWidth + 16 * scale)
+            if shifted < halfWidth or shifted > width - halfWidth then
+                shifted = x - direction * (halfWidth + 16 * scale)
+            end
+            x = math.max(halfWidth, math.min(width - halfWidth, shifted))
+        end
+        occupied[#occupied + 1] = { x = x, halfWidth = halfWidth }
+        local alpha = alifeMarkerAlpha(point.blinking, now)
+        drawALifeMarkerIcon(self, point, x - 8 * scale, markerY, scale, alpha)
+        drawMarkerDistance(self, label, x, markerY + 20 * scale, scale, alpha)
+        if point.armedCount > 0 then
+            drawFirearmMarkerIcon(self, x, markerY + 34 * scale, scale, alpha)
+        end
+    end
+
+    local edgeMarkers = self.alifeEdgeMarkers or { left = {}, right = {} }
+    for _, side in ipairs({ "left", "right" }) do
+        for index, point in ipairs(edgeMarkers[side] or {}) do
+            local x = side == "left"
+                and (6 + (index - 1) * 34) * scale
+                or width - (6 + (index - 1) * 34) * scale
+            local color = ALIFE_STANCE_COLORS[point.stance]
+            local arrow = side == "left" and "<" or ">"
+            local label = string.format("%dm", math.floor(point.distance + 0.5))
+            if point.count > 1 then label = label .. " +" .. tostring(point.count - 1) end
+            local alpha = alifeMarkerAlpha(point.blinking, now)
+            local arrowScale = 1.5 * scale
+            drawTextCentreScaled(self, arrow, x + scale, markerY + scale, arrowScale,
+                0.02, 0.02, 0.02, 0.85 * alpha)
+            for _, offset in ipairs({ -0.5, 0, 0.5 }) do
+                drawTextCentreScaled(self, arrow, x + offset * scale, markerY, arrowScale,
+                    color[1], color[2], color[3], alpha)
+            end
+            drawMarkerDistance(self, label, x, markerY + 20 * scale, scale, alpha)
+            if point.armedCount > 0 then
+                drawFirearmMarkerIcon(self, x, markerY + 34 * scale, scale, alpha)
+            end
+        end
+    end
 end
 
 local function ensureCompass(playerNum)
@@ -499,6 +855,16 @@ local function updateCompasses()
     local languageCode = gameLanguageCode()
     local labelColor = compassLabelColor()
     local heading = enabled and cameraHeading() or nil
+    local showALifeMarkers = enabled and not directionOnly and heading ~= nil
+        and optionValue("ShowALifeMarkers", true)
+    if showALifeMarkers and requireCompassItem then
+        showALifeMarkers = hasCompassItem(0)
+    end
+    alifeBridge.requested = showALifeMarkers == true
+    alifeBridge.range = alifeMarkerRange()
+    if not alifeBridge.requested then alifeMarkerStates = {} end
+    local alifeMarkers = alifeBridge.requested and type(alifeBridge.markers) == "table"
+        and alifeBridge.markers or {}
     for playerNum, ui in pairs(uiByPlayer) do
         local player = getSpecificPlayer(playerNum)
         local state = not directionOnly and player and Markers.refresh(player)
@@ -531,7 +897,28 @@ local function updateCompasses()
                 PIXELS_PER_DEGREE * scale, scale, factionRange,
                 ServerPolicy.getBoolean("ShowFactionPlayerDistance")) or {}
         ui.factionPlayerShowDistance = ServerPolicy.getBoolean("ShowFactionPlayerDistance")
-        local height = directionOnly and DIRECTION_ONLY_HEIGHT * scale or layout.height
+        ui.alifeMarkerPoints, ui.alifeEdgeMarkers = projectALifeMarkers(
+            player,
+            alifeMarkers,
+            heading,
+            width,
+            PIXELS_PER_DEGREE * scale,
+            scale,
+            alifeMarkerRange(),
+            optionValue("BlinkNewALifeThreats", true),
+            hostileCloseBlinkDistance()
+        )
+        ui.hasArmedALifeMarker = false
+        for _, point in ipairs(ui.alifeMarkerPoints) do
+            if point.armedCount > 0 then ui.hasArmedALifeMarker = true end
+        end
+        for _, side in ipairs({ "left", "right" }) do
+            for _, point in ipairs(ui.alifeEdgeMarkers[side]) do
+                if point.armedCount > 0 then ui.hasArmedALifeMarker = true end
+            end
+        end
+        local height = directionOnly and DIRECTION_ONLY_HEIGHT * scale
+            or layout.height + (ui.hasArmedALifeMarker and 6 * scale or 0)
         if ui:getHeight() ~= height then ui:setHeight(height) end
         local visible = heading ~= nil
             and (not requireCompassItem or hasCompassItem(playerNum))

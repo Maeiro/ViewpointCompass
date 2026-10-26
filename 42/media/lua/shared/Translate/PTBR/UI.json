@@ -1,9 +1,13 @@
 {
+    "UI_ViewpointCompass_Options_Category_General": "Geral",
+    "UI_ViewpointCompass_Options_Category_Display": "Exibição da bússola",
+    "UI_ViewpointCompass_Options_Category_MapMarkers": "Marcações do mapa",
+    "UI_ViewpointCompass_Options_Category_FactionPlayers": "Jogadores da facção",
     "UI_ViewpointCompass_Options_DirectionOnly": "Exibir somente a direção",
-    "UI_ViewpointCompass_Options_DirectionOnlyTooltip": "Exibe apenas a direção atual (cardinal ou intercardinal); oculta a régua, os graus, as marcações do mapa e os membros da facção.",
+    "UI_ViewpointCompass_Options_DirectionOnlyTooltip": "Exibe apenas a direção atual (cardinal ou intercardinal); oculta a régua, os graus, as marcações do mapa, os membros da facção e os NPCs do A-Life.",
     "UI_ViewpointCompass_Options_OpenWaypointManagerKey": "Abrir gerenciamento de destinos",
     "UI_ViewpointCompass_Options_OpenWaypointManagerKeyTooltip": "Abre ou fecha as marcações da bússola. Defina como Nenhuma para desativar o atalho.",
-    "UI_ViewpointCompass_Options_CompassScale": "Tamanho da bússola (%)",
+    "UI_ViewpointCompass_Options_CompassScale": "Tamanho da bússola (%%)",
     "UI_ViewpointCompass_Options_CompassScaleTooltip": "Redimensiona toda a bússola, incluindo textos, divisões e marcações.",
     "UI_ViewpointCompass_Options_RequireCompassItem": "Exigir uma bússola para exibir o compasso",
     "UI_ViewpointCompass_Options_RequireCompassItemTooltip": "Você precisa carregar a bússola original. O servidor também pode impor essa exigência.",
@@ -27,5 +31,14 @@
     "UI_ViewpointCompass_Options_ShowFactionPlayersTooltip": "Requer Viewpoint Compass no servidor. O servidor pode desativar esse recurso ou limitar seu alcance.",
     "UI_ViewpointCompass_Options_FactionPlayerRange": "Alcance de detecção de aliados (metros)",
     "UI_ViewpointCompass_Options_FactionPlayerRangeTooltip": "Detecta membros da mesma facção entre 25 e 1.000 metros, respeitando o limite do servidor. Padrão: 250 metros.",
-    "UI_ViewpointCompass_Options_FactionPlayerPosition": "Posição dos aliados na bússola"
+    "UI_ViewpointCompass_Options_FactionPlayerPosition": "Posição dos aliados na bússola",
+    "UI_ViewpointCompass_Options_ALifeMarkersTitle": "Marcações A-Life na bússola",
+    "UI_ViewpointCompass_Options_ShowALifeMarkers": "Exibir NPCs do A-Life na bússola",
+    "UI_ViewpointCompass_Options_ShowALifeMarkersTooltip": "Requer Viewpoint Threat Detector. Hostile é vermelho, Careful amarelo, Neutral branco, Friendly verde e Allied azul.",
+    "UI_ViewpointCompass_Options_ALifeMarkerRange": "Alcance dos marcadores A-Life (metros)",
+    "UI_ViewpointCompass_Options_ALifeMarkerRangeTooltip": "Distância máxima dos marcadores A-Life na bússola. Um tile é exibido como um metro.",
+    "UI_ViewpointCompass_Options_BlinkNewALifeThreats": "Piscar NPCs Hostile e Careful novos",
+    "UI_ViewpointCompass_Options_BlinkNewALifeThreatsTooltip": "Os marcadores Hostile e Careful piscam por alguns instantes quando aparecem na bússola.",
+    "UI_ViewpointCompass_Options_HostileCloseBlinkDistance": "Distância para piscar Hostile próximos (metros)",
+    "UI_ViewpointCompass_Options_HostileCloseBlinkDistanceTooltip": "Marcadores Hostile piscam continuamente dentro desta distância. Defina 0 para desativar."
 }
